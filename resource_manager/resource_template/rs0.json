@@ -1,0 +1,30 @@
+{
+    "executors": [
+        {
+            "id": 0,
+            "cpu_limit": 2,
+            "mem_limit": "2G",
+            "bind_port": 50061,
+            "bind_grpc_port": 50062,
+            "volumes": [
+                {
+                    "container_path": "/home/zsl/datafusion-ballista/result",
+                    "host_path": "/reuslt"
+                }
+            ]
+        },
+        {
+            "id": 1,
+            "cpu_limit": 10,
+            "mem_limit": "10G",
+            "bind_port": 50063,
+            "bind_grpc_port": 50064,
+            "volumes": [
+                {
+                    "container_path": "/home/zsl/datafusion-ballista/result",
+                    "host_path": "/reuslt"
+                }
+            ]
+        }
+    ]
+}

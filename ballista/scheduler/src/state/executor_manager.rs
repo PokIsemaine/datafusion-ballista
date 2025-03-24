@@ -66,6 +66,7 @@ impl ExecutorManager {
         Ok(())
     }
 
+    /// 有新 executor 注册时，也会调用该方法
     /// Bind the ready to running tasks from [`active_jobs`] with available executors.
     ///
     /// If `executors` is provided, only bind slots from the specified executor IDs

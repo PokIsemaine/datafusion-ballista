@@ -316,6 +316,7 @@ pub trait JobState: Send + Sync {
     fn produce_config(&self) -> SessionConfig;
 }
 
+// 作用是将任务绑定到可用的执行器上
 pub(crate) async fn bind_task_bias(
     mut slots: Vec<&mut AvailableTaskSlots>,
     active_jobs: Arc<HashMap<String, JobInfoCache>>,
@@ -367,6 +368,7 @@ pub(crate) async fn bind_task_bias(
                 .collect::<Vec<_>>();
             for (partition_id, task_info) in runnable_tasks {
                 // Assign [`slot`] with a slot available slot number larger than 0
+                // 如果当前slot还有可用的slot，则继续使用当前slot，这个和 round robin 不同
                 while slot.slots == 0 {
                     idx_slot += 1;
                     if idx_slot >= slots.len() {
@@ -454,6 +456,7 @@ pub(crate) async fn bind_task_round_robin(
                 .collect::<Vec<_>>();
             for (partition_id, task_info) in runnable_tasks {
                 // Move to the index which has available slots
+                // 循环找到一个有可用slot的slot
                 if idx_slot >= slots.len() {
                     idx_slot = 0;
                 }

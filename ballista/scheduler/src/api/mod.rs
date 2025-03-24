@@ -17,6 +17,7 @@ use axum::routing::patch;
 use axum::{routing::get, Router};
 use datafusion_proto::logical_plan::AsLogicalPlan;
 use datafusion_proto::physical_plan::AsExecutionPlan;
+use log::info;
 use std::sync::Arc;
 
 pub fn get_routes<
@@ -25,6 +26,7 @@ pub fn get_routes<
 >(
     scheduler_server: Arc<SchedulerServer<T, U>>,
 ) -> Router {
+    info!("Starting REST API server");
     Router::new()
         .route("/api/state", get(handlers::get_scheduler_state::<T, U>))
         .route("/api/executors", get(handlers::get_executors::<T, U>))

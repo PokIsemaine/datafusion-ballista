@@ -287,7 +287,7 @@ pub async fn start_executor_process(
             ))),
         }
     }?;
-
+    info!("成功连接到调度器");
     let mut scheduler = SchedulerGrpcClient::new(connection)
         .max_encoding_message_size(opt.grpc_max_encoding_message_size as usize)
         .max_decoding_message_size(opt.grpc_max_decoding_message_size as usize);
@@ -338,6 +338,7 @@ pub async fn start_executor_process(
 
     match scheduler_policy {
         TaskSchedulingPolicy::PushStaged => {
+            info!("Starting executor with push-staged task scheduling policy");
             service_handlers.push(
                 //If there is executor registration error during startup, return the error and stop early.
                 executor_server::startup(
@@ -352,6 +353,7 @@ pub async fn start_executor_process(
             );
         }
         _ => {
+            info!("Starting executor with pull task scheduling policy");
             service_handlers.push(tokio::spawn(execution_loop::poll_loop(
                 scheduler.clone(),
                 executor.clone(),

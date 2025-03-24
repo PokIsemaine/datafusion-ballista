@@ -33,7 +33,7 @@ use crate::cluster::BallistaCluster;
 use crate::config::SchedulerConfig;
 use crate::metrics::SchedulerMetricsCollector;
 use ballista_core::serde::scheduler::{ExecutorData, ExecutorMetadata};
-use log::{error, warn};
+use log::{error, info, warn};
 
 use crate::scheduler_server::event::QueryStageSchedulerEvent;
 use crate::scheduler_server::query_stage_scheduler::QueryStageScheduler;
@@ -171,6 +171,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerServer<T
         ctx: Arc<SessionContext>,
         plan: &LogicalPlan,
     ) -> Result<()> {
+        info!("提交任务: {job_id}, {job_name}");
         self.query_stage_event_loop
             .get_sender()?
             .post_event(QueryStageSchedulerEvent::JobQueued {
@@ -307,6 +308,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerServer<T
     }
 
     async fn do_register_executor(&self, metadata: ExecutorMetadata) -> Result<()> {
+        info!("有新的Executor注册: {metadata:?}");
         let executor_data = ExecutorData {
             executor_id: metadata.id.clone(),
             total_task_slots: metadata.specification.task_slots,

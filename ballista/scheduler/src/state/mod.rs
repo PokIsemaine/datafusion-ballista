@@ -157,10 +157,12 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerState<T,
         self.executor_manager.init().await
     }
 
+    // 当接收到 ReviveOffers 事件时，遍历所有正在执行中的 job，生成 task 并发送给 Executor 集群
     pub(crate) async fn revive_offers(
         &self,
         sender: EventSender<QueryStageSchedulerEvent>,
     ) -> Result<()> {
+        // 获取可调度的任务
         let schedulable_tasks = self
             .executor_manager
             .bind_schedulable_tasks(self.task_manager.get_running_job_cache())
@@ -251,9 +253,12 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerState<T,
     ) -> Result<Vec<ExecutorSlot>> {
         // Put tasks to the same executor together
         // And put tasks belonging to the same stage together for creating MultiTaskDefinition
+        // 首先，将任务按执行器和作业阶段进行分组。
+        // 使用 executor_stage_assignments 哈希映射来存储这些分组信息。
+        // 键是执行器 ID，值是另一个哈希映射，后者的键是作业阶段的标识符（由作业 ID 和阶段 ID 组成），值是任务描述的向量。
         let mut executor_stage_assignments: HashMap<
-            String,
-            HashMap<(String, usize), Vec<TaskDescription>>,
+            String,                                         // executor_id
+            HashMap<(String, usize), Vec<TaskDescription>>, // (job_id, stage_id) -> tasks
         > = HashMap::new();
         for (executor_id, task) in bound_tasks.into_iter() {
             let stage_key = (task.partition.job_id.clone(), task.partition.stage_id);
@@ -273,6 +278,18 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerState<T,
             }
         }
 
+        // 打印任务分配信息
+        for (executor_id, tasks) in executor_stage_assignments.iter() {
+            for ((job_id, stage_id), tasks) in tasks.iter() {
+                for task in tasks.iter() {
+                    info!(
+                        "Assigning job {} stage {} task {} to executor {}",
+                        job_id, stage_id, task.task_id, executor_id
+                    );
+                }
+            }
+        }
+
         let mut join_handles = vec![];
         for (executor_id, tasks) in executor_stage_assignments.into_iter() {
             let tasks: Vec<Vec<TaskDescription>> = tasks.into_values().collect();
@@ -286,6 +303,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerState<T,
                     .get_executor_metadata(&executor_id)
                     .await
                 {
+                    // 如果成功获取执行器元数据，则调用 task_manager.launch_multi_task 方法来启动任务。
                     Ok(executor) => {
                         if let Err(e) = state
                             .task_manager
@@ -318,6 +336,9 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerState<T,
             join_handles.push(join_handle);
         }
 
+        // 为每个执行器创建一个异步任务来启动其分配的任务。
+        // 使用 tokio::spawn 创建异步任务，并在其中调用 task_manager.launch_multi_task 方法来启动任务。
+        // 如果启动失败，则移除该执行器
         let unassigned_executor_slots =
             futures::future::join_all(join_handles)
                 .await

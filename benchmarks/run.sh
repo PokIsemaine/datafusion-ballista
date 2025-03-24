@@ -26,7 +26,7 @@ set -x
 # queries return decimal results with the correct precision
 for query in 4 12 13
 do
-  /root/tpch benchmark ballista --host ballista-scheduler --port 50050 --query $query --path /data --format tbl --iterations 1 --debug --expected /data
+  /root/tpch benchmark ballista --host localhost --port 50050 --query $query --path /data --format tbl --iterations 1 --debug --expected /data --output /data/results/
 done
 
 # at least make sure these queries run, even though we do not check that the results are correct yet
@@ -34,6 +34,6 @@ done
 #TODO: add query 16 once we support it
 for query in 1 2 3 5 6 7 8 9 10 11 14 15 17 18 19 20 21 22
 do
-  /root/tpch benchmark ballista --host ballista-scheduler --port 50050 --query $query --path /data --format tbl --iterations 1 --debug
+  /root/tpch benchmark ballista --host localhost --port 50050 --query $query --path /data --format tbl --iterations 1 --debug --output /data/results/
 done
 

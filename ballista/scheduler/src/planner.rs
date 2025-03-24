@@ -81,6 +81,7 @@ impl DistributedPlanner {
         job_id: &'a str,
         execution_plan: Arc<dyn ExecutionPlan>,
     ) -> Result<PartialQueryStageResult> {
+        // 参考 https://zhuanlan.zhihu.com/p/693963072
         // recurse down and replace children
         if execution_plan.children().is_empty() {
             return Ok((execution_plan, vec![]));
@@ -95,10 +96,18 @@ impl DistributedPlanner {
             stages.append(&mut child_stages);
         }
 
+        // Ballista 会在执行 repartition 的算子，
+        // 如 RepartitionExec/CoalescePartitionsExec/SortPreservingMergeExec 算子，
+        // 也被称为 pipeline breaker）那里插入 shuffle 算子，将单机执行计划分割成多个 stage，
+        // 每个 stage 内部所有算子均为相同的分区方案。
+        // 每个 stage 最终都会通过 ShuffleWriterExec 算子对执行结果 repartition （如有需要）并写入本地磁盘
+        // 每个有前置依赖的 stage 都会从 ShuffleReaderExeUnresolvedShuffleExecc 算子开始执行，ShuffleReaderExec 算子负责读取前置 stage 产生的中间执行结果。
         if let Some(_coalesce) = execution_plan
             .as_any()
             .downcast_ref::<CoalescePartitionsExec>()
         {
+            // CoalescePartitionsExec 用于将多个分区合并为一个分区
+            // 创建一个新的 ShuffleWriterExec
             let shuffle_writer = create_shuffle_writer(
                 job_id,
                 self.next_stage_id(),
@@ -115,6 +124,8 @@ impl DistributedPlanner {
             .as_any()
             .downcast_ref::<SortPreservingMergeExec>(
         ) {
+            // SortPreservingMergeExec 用于在保持分区排序的情况下合并多个分区
+            // 这在某些情况下是必要的，例如在执行全局排序或排序窗口函数时，需要确保数据在合并后仍然保持排序。
             let shuffle_writer = create_shuffle_writer(
                 job_id,
                 self.next_stage_id(),
@@ -130,6 +141,8 @@ impl DistributedPlanner {
         } else if let Some(repart) =
             execution_plan.as_any().downcast_ref::<RepartitionExec>()
         {
+            // RepartitionExec 用于将数据重新分区
+            // 这在某些情况下是必要的，例如在执行聚合操作时，需要确保相同的键值在同一个分区中
             match repart.properties().output_partitioning() {
                 Partitioning::Hash(_, _) => {
                     let shuffle_writer = create_shuffle_writer(

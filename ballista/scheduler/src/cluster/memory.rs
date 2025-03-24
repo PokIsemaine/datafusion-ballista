@@ -102,6 +102,7 @@ impl ClusterState for InMemoryClusterState {
         active_jobs: Arc<HashMap<String, JobInfoCache>>,
         executors: Option<HashSet<String>>,
     ) -> Result<Vec<BoundTask>> {
+        // [{executor_id, task_info}]
         let mut guard = self.task_slots.lock().await;
 
         let available_slots: Vec<&mut AvailableTaskSlots> = guard

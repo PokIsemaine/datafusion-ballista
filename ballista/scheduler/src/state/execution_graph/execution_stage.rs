@@ -245,6 +245,16 @@ pub(crate) struct TaskInfo {
     //pub(crate) session_config: Arc<SessionConfig>,
 }
 
+impl Debug for TaskInfo {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "TaskInfo[task_id={}, scheduled_time={}, launch_time={}, start_exec_time={}, end_exec_time={}, finish_time={}, task_status={:?}]",
+            self.task_id, self.scheduled_time, self.launch_time, self.start_exec_time, self.end_exec_time, self.finish_time, self.task_status
+        )
+    }
+}
+
 impl UnresolvedStage {
     pub(super) fn new(
         stage_id: usize,
@@ -633,6 +643,15 @@ impl RunningStage {
                 .as_millis(),
             task_status: task_status.clone(),
         };
+        // info!("Task {} for partition {} updated", task_id, partition_id);
+        // info!("scheduled_time: {}, launch_time: {}, start_exec_time: {}, end_exec_time: {}, finish_time: {}",
+        //  scheduled_time, status.launch_time, status.start_exec_time, status.end_exec_time, updated_task_info.finish_time);
+        // info!(
+        //     "scheduled_latency: {}, exec_latency: {}, total_latency: {}",
+        //     updated_task_info.launch_time - scheduled_time,
+        //     updated_task_info.end_exec_time - updated_task_info.start_exec_time,
+        //     updated_task_info.finish_time - scheduled_time
+        // );
         self.task_infos[partition_id] = Some(updated_task_info);
 
         if let task_status::Status::Failed(failed_task) = task_status {
@@ -656,12 +675,15 @@ impl RunningStage {
         if metrics.is_empty() {
             return Ok(());
         }
-
+        // 检查阶段是否已有指标，如果阶段已有指标Some(combined_metrics)，则将任务的指标合并到现有的阶段指标中
         let new_metrics_set = if let Some(combined_metrics) = &mut self.stage_metrics {
+            // 验证任务指标的长度是否与阶段指标的长度一致。如果不一致，返回错误。这是为了确保任务和阶段的指标结构匹配。
             if metrics.len() != combined_metrics.len() {
                 return Err(BallistaError::Internal(format!("Error updating task metrics to stage {}, task metrics array size {} does not equal \
                 with the stage metrics array size {} for task {}", self.stage_id, metrics.len(), combined_metrics.len(), partition)));
             }
+            // 将任务的 OperatorMetricsSet 转换为 MetricValue 的集合。
+            // 使用 try_into 方法进行类型转换，并收集到一个二维数组中（每个操作符的指标集合）。
             let metrics_values_array = metrics
                 .into_iter()
                 .map(|ms| {
@@ -672,6 +694,8 @@ impl RunningStage {
                 })
                 .collect::<Result<Vec<_>>>()?;
 
+            // 遍历阶段指标和任务指标，并将它们一一对应地合并。
+            // 调用 combine_metrics_set 方法，将任务的指标累加到阶段的指标中。
             combined_metrics
                 .iter_mut()
                 .zip(metrics_values_array)
@@ -680,6 +704,7 @@ impl RunningStage {
                 })
                 .collect()
         } else {
+            // 如果阶段尚未有指标（None），则直接将任务的指标转换为阶段指标。
             metrics
                 .into_iter()
                 .map(|ms| ms.try_into())
@@ -875,7 +900,23 @@ impl Debug for SuccessfulStage {
             f,
             "=========SuccessfulStage[stage_id={}.{}, partitions={}]=========\n{}",
             self.stage_id, self.stage_attempt_num, self.partitions, plan
-        )
+        )?;
+
+        // tasks_info
+        let mut min_scheduled_time = u128::MAX;
+        let mut max_finish_time = u128::MIN;
+        for task in self.task_infos.iter() {
+            min_scheduled_time = min_scheduled_time.min(task.scheduled_time);
+            max_finish_time = max_finish_time.max(task.finish_time);
+            write!(f, "{:?}\n", task)?;
+        }
+        // stage_info
+        write!(
+            f,
+            "stage total time: {}\n",
+            max_finish_time - min_scheduled_time
+        )?;
+        Ok(())
     }
 }
 

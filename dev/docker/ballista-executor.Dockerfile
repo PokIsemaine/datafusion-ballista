@@ -27,8 +27,15 @@ RUN apt-get update && apt-get install -y netcat
 
 COPY target/$RELEASE_FLAG/ballista-executor /root/ballista-executor
 
+# Expose Ballista Executor flight port
+ARG BIND_PORT=50051
+ENV BIND_PORT=${BIND_PORT}
+EXPOSE ${BIND_PORT}
 # Expose Ballista Executor gRPC port
-EXPOSE 50051
+ARG BIND_GRPC_PORT=50052
+ENV BIND_GRPC_PORT=${BIND_GRPC_PORT}
+EXPOSE ${BIND_GRPC_PORT}
+
 
 COPY dev/docker/executor-entrypoint.sh /root/executor-entrypoint.sh
 ENTRYPOINT ["/root/executor-entrypoint.sh"]

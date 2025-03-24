@@ -18,6 +18,8 @@
 use std::collections::{HashMap, HashSet};
 use std::convert::TryInto;
 use std::fmt::{Debug, Formatter};
+use std::fs::File;
+use std::io::BufWriter;
 use std::iter::FromIterator;
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -149,6 +151,7 @@ impl ExecutionGraph {
         queued_at: u64,
         session_config: Arc<SessionConfig>,
     ) -> Result<Self> {
+        info!("生成分布式计划");
         let mut planner = DistributedPlanner::new();
 
         let output_partitions = plan.properties().output_partitioning().partition_count();
@@ -286,6 +289,7 @@ impl ExecutionGraph {
 
         // Revive before updating due to some updates not saved
         // It will be refined later
+        // 将已解析的阶段 (ResolvedStage) 转换为运行阶段 (RunningStage)，以便处理任务状态更新。
         self.revive();
 
         let current_running_stages: HashSet<usize> =
@@ -308,8 +312,10 @@ impl ExecutionGraph {
 
         for (stage_id, stage_task_statuses) in job_task_statuses {
             if let Some(stage) = self.stages.get_mut(&stage_id) {
+                // 如果阶段是运行中的阶段 (ExecutionStage::Running)：
                 if let ExecutionStage::Running(running_stage) = stage {
                     let mut locations = vec![];
+                    // 遍历该阶段的任务状态
                     for task_status in stage_task_statuses.into_iter() {
                         let task_stage_attempt_num =
                             task_status.stage_attempt_num as usize;
@@ -328,13 +334,13 @@ impl ExecutionGraph {
                             partition_id
                         );
                         let operator_metrics = task_status.metrics.clone();
-
+                        // 更新任务信息
                         if !running_stage
                             .update_task_info(partition_id, task_status.clone())
                         {
                             continue;
                         }
-
+                        // 处理失败任务
                         if let Some(task_status::Status::Failed(failed_task)) =
                             task_status.status
                         {
@@ -474,6 +480,8 @@ impl ExecutionGraph {
                     }
 
                     let output_links = running_stage.output_links.clone();
+
+                    // 用于更新当前阶段的输出链接（output_links），并检查这些链接的目标阶段是否可以解析。如果目标阶段的所有输入都已准备好，则将其标记为可解析（resolved）
                     resolved_stages.extend(
                         &mut self
                             .update_stage_output_links(
@@ -718,6 +726,7 @@ impl ExecutionGraph {
                 queued_at: self.queued_at,
                 completed_at: timestamp_millis(),
             });
+            self.execution_to_csv("/data/csv_data/execution_graph.csv")?;
         } else if has_resolved {
             events.push(QueryStageSchedulerEvent::JobUpdated(job_id))
         }
@@ -1171,6 +1180,11 @@ impl ExecutionGraph {
         if let Some(ExecutionStage::Running(stage)) = self.stages.remove(&stage_id) {
             self.stages
                 .insert(stage_id, ExecutionStage::Successful(stage.to_successful()));
+            info!(
+                "Stage {} is successful,\n{:?}",
+                stage_id,
+                self.stages.get(&stage_id)
+            );
             self.clear_stage_failure(stage_id);
             true
         } else {
@@ -1318,6 +1332,117 @@ impl ExecutionGraph {
     /// Clear the stage failure count for this stage if the stage is finally success
     fn clear_stage_failure(&mut self, stage_id: usize) {
         self.failed_stage_attempts.remove(&stage_id);
+    }
+
+    pub fn execution_to_csv(&self, file_path: &str) -> Result<()> {
+        // 打开文件并创建一个 CSV 写入器
+        let file = File::create(file_path).map_err(|e| {
+            BallistaError::General(format!("Failed to create file: {}", e))
+        })?;
+        let mut writer = csv::Writer::from_writer(BufWriter::new(file));
+
+        // 写入 CSV 表头
+        writer
+            .write_record(&[
+                "job_id",
+                "job_name",
+                "job_status",
+                "job_queued_at",
+                "job_start_time",
+                "job_end_time", // job_record
+                "stage_id",
+                "stage_attempt_num",
+                "stage_partitions",
+                "plan", // stage_record
+                "task_id",
+                "task_scheduled_time",
+                "task_launch_time",
+                "task_start_exec_time",
+                "task_end_exec_time",
+                "task_finish_time",
+                "task_status", // task_record
+            ])
+            .map_err(|e| {
+                BallistaError::General(format!("Failed to write to file: {}", e))
+            })?;
+
+        let job_status = match &self.status {
+            JobStatus {
+                status: Some(job_status::Status::Failed(failed)),
+                ..
+            } => format!("Failed: {}", failed.error),
+            JobStatus {
+                status: Some(job_status::Status::Successful(_)),
+                ..
+            } => "Success".to_string(),
+            _ => "Running".to_string(),
+        };
+
+        let job_record = vec![
+            self.job_id.clone(),
+            self.job_name.clone(),
+            job_status,
+            self.queued_at.to_string(),
+            self.start_time.to_string(),
+            self.end_time.to_string(),
+        ];
+
+        // 写入 CSV 行
+        for (stage_id, stage) in self.stages.iter() {
+            if let ExecutionStage::Successful(successful_stage) = stage {
+                let plan_record = format!("{:?}", successful_stage.plan);
+                let stage_record = vec![
+                    stage_id.to_string(),
+                    successful_stage.stage_attempt_num.to_string(),
+                    successful_stage.partitions.to_string(),
+                    plan_record,
+                ];
+
+                // TODO: output_links
+                // TODO: inputs
+                for task in successful_stage.task_infos.iter() {
+                    let task_status = match &task.task_status {
+                        task_status::Status::Running(running_task) => {
+                            format!("Running: {}", running_task.executor_id)
+                        }
+                        task_status::Status::Failed(failed_task) => {
+                            format!("Failed: {}", failed_task.error)
+                        }
+                        task_status::Status::Successful(_) => "Success".to_string(),
+                    };
+                    let task_record = vec![
+                        task.task_id.to_string(),
+                        task.scheduled_time.to_string(),
+                        task.launch_time.to_string(),
+                        task.start_exec_time.to_string(),
+                        task.end_exec_time.to_string(),
+                        task.finish_time.to_string(),
+                        task_status,
+                    ];
+
+                    // 合并所有记录并写入文件
+                    let combin_record = job_record
+                        .iter()
+                        .chain(stage_record.iter())
+                        .chain(task_record.iter())
+                        .map(|s| s.to_string())
+                        .collect::<Vec<String>>();
+                    writer.write_record(&combin_record).map_err(|e| {
+                        BallistaError::General(format!("Failed to write to file: {}", e))
+                    })?;
+                }
+                // TODO: stage_metrics
+                // TODO: session_config
+            } else {
+                error!("Stage {} is not successful", stage_id);
+            }
+        }
+
+        // 刷新写入器并关闭文件
+        writer.flush().map_err(|e| {
+            BallistaError::General(format!("Failed to write to file: {}", e))
+        })?;
+        Ok(())
     }
 }
 

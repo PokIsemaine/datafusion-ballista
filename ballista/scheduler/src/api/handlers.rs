@@ -28,6 +28,7 @@ use graphviz_rust::cmd::{CommandArg, Format};
 use graphviz_rust::exec;
 use graphviz_rust::printer::PrinterContext;
 use http::{header::CONTENT_TYPE, StatusCode};
+use log::info;
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -74,6 +75,7 @@ pub async fn get_scheduler_state<
 >(
     State(data_server): State<Arc<SchedulerServer<T, U>>>,
 ) -> impl IntoResponse {
+    info!("Received request for scheduler state");
     let response = SchedulerStateResponse {
         started: data_server.start_time,
         version: BALLISTA_VERSION,

@@ -132,6 +132,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerGrpc
                     }
                 }
             }
+            info!("PollWork 结果 tasks: {:?}", tasks);
             Ok(Response::new(PollWorkResult { tasks }))
         } else {
             warn!("Received invalid executor poll_work request");
@@ -139,6 +140,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerGrpc
         }
     }
 
+    // PushStagedScheduling 才会调用这个接口
     async fn register_executor(
         &self,
         request: Request<RegisterExecutorParams>,
@@ -425,6 +427,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerGrpc
                     }
                 }
                 Query::Sql(sql) => {
+                    info!("生成单机逻辑计划");
                     match session_ctx
                         .sql(&sql)
                         .await

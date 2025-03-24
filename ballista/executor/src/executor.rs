@@ -169,7 +169,7 @@ impl Executor {
         let partitions = task.await??;
 
         self.abort_handles.remove(&(task_id, partition.clone()));
-
+        // 统计每个stage的执行情况
         self.metrics_collector.record_stage(
             &partition.job_id,
             partition.stage_id,

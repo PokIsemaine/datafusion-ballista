@@ -308,6 +308,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> ExecutorServer<T,
     /// This method should not return Err. If task fails, a failure task status should be sent
     /// to the channel to notify the scheduler.
     async fn run_task(&self, task_identity: String, curator_task: CuratorTaskDefinition) {
+        // 记录任务开始时间
         let start_exec_time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
@@ -328,6 +329,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> ExecutorServer<T,
             partition_id,
         };
 
+        // 创建查询阶段执行计划
         let query_stage_exec = self
             .executor
             .execution_engine
@@ -355,7 +357,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> ExecutorServer<T,
         };
 
         info!("Start to execute shuffle write for task {}", task_identity);
-
+        // 执行任务
         let execution_result = self
             .executor
             .execute_query_stage(
@@ -471,8 +473,8 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> TaskRunnerPool<T,
 
     fn start(
         &self,
-        mut rx_task: mpsc::Receiver<CuratorTaskDefinition>,
-        mut rx_task_status: mpsc::Receiver<CuratorTaskStatus>,
+        mut rx_task: mpsc::Receiver<CuratorTaskDefinition>, // 一个异步通道，用于接收任务定义
+        mut rx_task_status: mpsc::Receiver<CuratorTaskStatus>, // 一个异步通道，用于接收任务状态
         shutdown_noti: &ShutdownNotifier,
     ) {
         //1. loop for task status reporting
@@ -486,6 +488,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> TaskRunnerPool<T,
                 let mut curator_task_status_map: HashMap<String, Vec<TaskStatus>> =
                     HashMap::new();
                 // First try to fetch task status from the channel in *blocking* mode
+                // 阻塞接收任务状态：使用 tokio::select! 从通道中接收任务状态。如果接收到关闭信号，则退出循环。
                 let maybe_task_status: Option<CuratorTaskStatus> = tokio::select! {
                      task_status = rx_task_status.recv() => task_status,
                     _ = tasks_status_shutdown.recv() => {
@@ -509,6 +512,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> TaskRunnerPool<T,
                 }
 
                 // Then try to fetch by non-blocking mode to fetch as much finished tasks as possible
+                // 非阻塞接收任务状态：在阻塞接收后，尝试通过 try_recv 非阻塞地获取更多任务状态。
                 loop {
                     match rx_task_status.try_recv() {
                         Ok(task_status) => {
@@ -530,6 +534,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> TaskRunnerPool<T,
                     }
                 }
 
+                // 发送任务状态：将收集到的任务状态发送到对应的调度器。如果发送失败，记录错误日志
                 for (scheduler_id, tasks_status) in curator_task_status_map.into_iter() {
                     match executor_server.get_scheduler_client(&scheduler_id).await {
                         Ok(mut scheduler) => {
