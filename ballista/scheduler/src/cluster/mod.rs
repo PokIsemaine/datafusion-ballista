@@ -956,10 +956,15 @@ mod test {
             test_aggregation_plan_with_job_id(num_target_partitions, job_id).await;
         let executor = ExecutorMetadata {
             id: "executor_0".to_string(),
+            executor_name: "executor_0".to_string(),
             host: "localhost".to_string(),
             port: 50051,
             grpc_port: 50052,
-            specification: ExecutorSpecification { task_slots: 32 },
+            specification: ExecutorSpecification {
+                cpu_limit: 2,
+                memory_limit: 2,
+                task_slots: 32,
+            },
         };
 
         // complete first stage

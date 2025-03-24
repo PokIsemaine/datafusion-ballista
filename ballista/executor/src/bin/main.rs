@@ -33,6 +33,7 @@ static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
 #[tokio::main]
 async fn main() -> ballista_core::error::Result<()> {
+    println!("Ballista Rust Executor");
     // parse command-line arguments
     let (opt, _remaining_args) =
         Config::including_optional_config_files(&["/etc/ballista/executor.toml"])
@@ -42,7 +43,7 @@ async fn main() -> ballista_core::error::Result<()> {
         print_version();
         std::process::exit(0);
     }
-
+    println!("Configuration: {}", opt.cpu_limit.unwrap_or(123456));
     let config: ExecutorProcessConfig = opt.try_into()?;
 
     let rust_log = env::var(EnvFilter::DEFAULT_ENV);

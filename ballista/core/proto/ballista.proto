@@ -283,10 +283,11 @@ message OperatorMetric {
 // Used by scheduler
 message ExecutorMetadata {
   string id = 1;
-  string host = 2;
-  uint32 port = 3;
-  uint32 grpc_port = 4;
-  ExecutorSpecification specification = 5;
+  string executor_name = 2;
+  string host = 3;
+  uint32 port = 4;
+  uint32 grpc_port = 5;
+  ExecutorSpecification specification = 6;
 }
 
 
@@ -294,10 +295,11 @@ message ExecutorMetadata {
 // communication
 message ExecutorRegistration {
   string id = 1;
-  optional string host = 2;
-  uint32 port = 3;
-  uint32 grpc_port = 4;
-  ExecutorSpecification specification = 5;
+  string executor_name = 2;
+  optional string host = 3;
+  uint32 port = 4;
+  uint32 grpc_port = 5;
+  ExecutorSpecification specification = 6;
 }
 
 message ExecutorHeartbeat {
@@ -329,9 +331,11 @@ message ExecutorSpecification {
 }
 
 message ExecutorResource {
+  uint64 cpu_limit = 1;
+  uint64 memory_limit = 2;
   // TODO add more resources
   oneof resource {
-    uint32 task_slots = 1;
+    uint32 task_slots = 3;
   }
 }
 
@@ -346,7 +350,8 @@ message ExecutorTaskSlots {
 
 message ExecutorData {
   string executor_id = 1;
-  repeated ExecutorResourcePair resources = 2;
+  string executor_name = 2;
+  repeated ExecutorResourcePair resources = 3;
 }
 
 message ExecutorResourcePair {

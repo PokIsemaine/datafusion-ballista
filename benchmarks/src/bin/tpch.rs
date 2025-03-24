@@ -354,7 +354,7 @@ async fn benchmark_ballista(opt: BallistaBenchmarkOpt) -> Result<()> {
 
     let config = SessionConfig::new_with_ballista()
         .with_target_partitions(opt.partitions)
-        .with_ballista_job_name(&format!("Query derived from TPC-H q{}", opt.query))
+        .with_ballista_job_name(&format!("TPCHq{}", opt.query))
         .with_batch_size(opt.batch_size)
         .with_collect_statistics(true);
 

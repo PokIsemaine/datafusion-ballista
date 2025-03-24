@@ -76,6 +76,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerGrpc
             {
                 let metadata = ExecutorMetadata {
                     id: metadata.id,
+                    executor_name: metadata.executor_name,
                     host: metadata
                         .host
                         .unwrap_or_else(|| remote_addr.unwrap().ip().to_string()),
@@ -153,6 +154,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerGrpc
             info!("Received register executor request for {:?}", metadata);
             let metadata = ExecutorMetadata {
                 id: metadata.id,
+                executor_name: metadata.executor_name,
                 host: metadata
                     .host
                     .unwrap_or_else(|| remote_addr.unwrap().ip().to_string()),
@@ -198,6 +200,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerGrpc
             if let Some(metadata) = metadata {
                 let metadata = ExecutorMetadata {
                     id: metadata.id,
+                    executor_name: metadata.executor_name,
                     host: metadata
                         .host
                         .unwrap_or_else(|| remote_addr.unwrap().ip().to_string()),
@@ -621,10 +624,18 @@ mod test {
         scheduler.init().await?;
         let exec_meta = ExecutorRegistration {
             id: "abc".to_owned(),
+            executor_name: "test_executor".to_owned(),
             host: Some("http://localhost:8080".to_owned()),
             port: 0,
             grpc_port: 0,
-            specification: Some(ExecutorSpecification { task_slots: 2 }.into()),
+            specification: Some(
+                ExecutorSpecification {
+                    cpu_limit: 2,
+                    memory_limit: 2,
+                    task_slots: 2,
+                }
+                .into(),
+            ),
         };
         let request: Request<PollWorkParams> = Request::new(PollWorkParams {
             metadata: Some(exec_meta.clone()),
@@ -709,10 +720,18 @@ mod test {
 
         let exec_meta = ExecutorRegistration {
             id: "abc".to_owned(),
+            executor_name: "abc".to_owned(),
             host: Some("http://localhost:8080".to_owned()),
             port: 0,
             grpc_port: 0,
-            specification: Some(ExecutorSpecification { task_slots: 2 }.into()),
+            specification: Some(
+                ExecutorSpecification {
+                    cpu_limit: 2,
+                    memory_limit: 2,
+                    task_slots: 2,
+                }
+                .into(),
+            ),
         };
 
         let request: Request<RegisterExecutorParams> =
@@ -794,10 +813,18 @@ mod test {
 
         let exec_meta = ExecutorRegistration {
             id: "abc".to_owned(),
+            executor_name: "abc".to_owned(),
             host: Some("http://localhost:8080".to_owned()),
             port: 0,
             grpc_port: 0,
-            specification: Some(ExecutorSpecification { task_slots: 2 }.into()),
+            specification: Some(
+                ExecutorSpecification {
+                    cpu_limit: 2,
+                    memory_limit: 2,
+                    task_slots: 2,
+                }
+                .into(),
+            ),
         };
 
         let request: Request<HeartBeatParams> = Request::new(HeartBeatParams {
@@ -847,10 +874,18 @@ mod test {
 
         let exec_meta = ExecutorRegistration {
             id: "abc".to_owned(),
+            executor_name: "abc".to_owned(),
             host: Some("http://localhost:8080".to_owned()),
             port: 0,
             grpc_port: 0,
-            specification: Some(ExecutorSpecification { task_slots: 2 }.into()),
+            specification: Some(
+                ExecutorSpecification {
+                    task_slots: 2,
+                    cpu_limit: 2,
+                    memory_limit: 2,
+                }
+                .into(),
+            ),
         };
 
         let request: Request<RegisterExecutorParams> =

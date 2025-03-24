@@ -55,6 +55,9 @@ impl TryFrom<Config> for ExecutorProcessConfig {
             override_logical_codec: None,
             override_physical_codec: None,
             override_arrow_flight_service: None,
+            cpu_limit: opt.cpu_limit,
+            memory_limit: opt.memory_limit,
+            executor_name: opt.executor_name,
         })
     }
 }

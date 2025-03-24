@@ -198,6 +198,7 @@ impl Into<protobuf::ExecutorMetadata> for ExecutorMetadata {
     fn into(self) -> protobuf::ExecutorMetadata {
         protobuf::ExecutorMetadata {
             id: self.id,
+            executor_name: self.executor_name,
             host: self.host,
             port: self.port as u32,
             grpc_port: self.grpc_port as u32,
@@ -210,12 +211,13 @@ impl Into<protobuf::ExecutorMetadata> for ExecutorMetadata {
 impl Into<protobuf::ExecutorSpecification> for ExecutorSpecification {
     fn into(self) -> protobuf::ExecutorSpecification {
         protobuf::ExecutorSpecification {
-            resources: vec![protobuf::executor_resource::Resource::TaskSlots(
-                self.task_slots,
-            )]
-            .into_iter()
-            .map(|r| protobuf::ExecutorResource { resource: Some(r) })
-            .collect(),
+            resources: vec![protobuf::ExecutorResource {
+                cpu_limit: self.cpu_limit,
+                memory_limit: self.memory_limit,
+                resource: Some(protobuf::executor_resource::Resource::TaskSlots(
+                    self.task_slots,
+                )),
+            }],
         }
     }
 }
@@ -230,6 +232,7 @@ impl Into<protobuf::ExecutorData> for ExecutorData {
     fn into(self) -> protobuf::ExecutorData {
         protobuf::ExecutorData {
             executor_id: self.executor_id,
+            executor_name: self.executor_name,
             resources: vec![ExecutorResourcePair {
                 total: protobuf::executor_resource::Resource::TaskSlots(
                     self.total_task_slots,
@@ -241,9 +244,13 @@ impl Into<protobuf::ExecutorData> for ExecutorData {
             .into_iter()
             .map(|r| protobuf::ExecutorResourcePair {
                 total: Some(protobuf::ExecutorResource {
+                    cpu_limit: self.cpu_limit,
+                    memory_limit: self.memory_limit,
                     resource: Some(r.total),
                 }),
                 available: Some(protobuf::ExecutorResource {
+                    cpu_limit: self.cpu_limit,
+                    memory_limit: self.memory_limit,
                     resource: Some(r.available),
                 }),
             })

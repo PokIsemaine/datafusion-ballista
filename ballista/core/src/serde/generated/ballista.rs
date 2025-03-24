@@ -429,12 +429,14 @@ pub struct ExecutorMetadata {
     #[prost(string, tag = "1")]
     pub id: ::prost::alloc::string::String,
     #[prost(string, tag = "2")]
+    pub executor_name: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
     pub host: ::prost::alloc::string::String,
-    #[prost(uint32, tag = "3")]
-    pub port: u32,
     #[prost(uint32, tag = "4")]
+    pub port: u32,
+    #[prost(uint32, tag = "5")]
     pub grpc_port: u32,
-    #[prost(message, optional, tag = "5")]
+    #[prost(message, optional, tag = "6")]
     pub specification: ::core::option::Option<ExecutorSpecification>,
 }
 /// Used for scheduler-executor
@@ -443,13 +445,15 @@ pub struct ExecutorMetadata {
 pub struct ExecutorRegistration {
     #[prost(string, tag = "1")]
     pub id: ::prost::alloc::string::String,
-    #[prost(string, optional, tag = "2")]
+    #[prost(string, tag = "2")]
+    pub executor_name: ::prost::alloc::string::String,
+    #[prost(string, optional, tag = "3")]
     pub host: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(uint32, tag = "3")]
-    pub port: u32,
     #[prost(uint32, tag = "4")]
+    pub port: u32,
+    #[prost(uint32, tag = "5")]
     pub grpc_port: u32,
-    #[prost(message, optional, tag = "5")]
+    #[prost(message, optional, tag = "6")]
     pub specification: ::core::option::Option<ExecutorSpecification>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -505,8 +509,12 @@ pub struct ExecutorSpecification {
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]
 pub struct ExecutorResource {
+    #[prost(uint64, tag = "1")]
+    pub cpu_limit: u64,
+    #[prost(uint64, tag = "2")]
+    pub memory_limit: u64,
     /// TODO add more resources
-    #[prost(oneof = "executor_resource::Resource", tags = "1")]
+    #[prost(oneof = "executor_resource::Resource", tags = "3")]
     pub resource: ::core::option::Option<executor_resource::Resource>,
 }
 /// Nested message and enum types in `ExecutorResource`.
@@ -514,7 +522,7 @@ pub mod executor_resource {
     /// TODO add more resources
     #[derive(Clone, Copy, PartialEq, ::prost::Oneof)]
     pub enum Resource {
-        #[prost(uint32, tag = "1")]
+        #[prost(uint32, tag = "3")]
         TaskSlots(u32),
     }
 }
@@ -534,7 +542,9 @@ pub struct ExecutorTaskSlots {
 pub struct ExecutorData {
     #[prost(string, tag = "1")]
     pub executor_id: ::prost::alloc::string::String,
-    #[prost(message, repeated, tag = "2")]
+    #[prost(string, tag = "2")]
+    pub executor_name: ::prost::alloc::string::String,
+    #[prost(message, repeated, tag = "3")]
     pub resources: ::prost::alloc::vec::Vec<ExecutorResourcePair>,
 }
 #[derive(Clone, Copy, PartialEq, ::prost::Message)]

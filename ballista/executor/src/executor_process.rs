@@ -103,6 +103,9 @@ pub struct ExecutorProcessConfig {
     pub override_physical_codec: Option<Arc<dyn PhysicalExtensionCodec>>,
     /// [ArrowFlightServerProvider] implementation override option
     pub override_arrow_flight_service: Option<Arc<ArrowFlightServerProvider>>,
+    pub cpu_limit: Option<u64>,
+    pub memory_limit: Option<u64>, // in GB
+    pub executor_name: Option<String>,
 }
 
 impl ExecutorProcessConfig {
@@ -146,6 +149,9 @@ impl Default for ExecutorProcessConfig {
             override_logical_codec: None,
             override_physical_codec: None,
             override_arrow_flight_service: None,
+            cpu_limit: None,
+            memory_limit: None,
+            executor_name: None,
         }
     }
 }
@@ -188,11 +194,14 @@ pub async fn start_executor_process(
     let executor_id = Uuid::new_v4().to_string();
     let executor_meta = ExecutorRegistration {
         id: executor_id.clone(),
+        executor_name: opt.executor_name.clone().unwrap(),
         host: opt.external_host.clone(),
         port: opt.port as u32,
         grpc_port: opt.grpc_port as u32,
         specification: Some(ExecutorSpecification {
             resources: vec![ExecutorResource {
+                cpu_limit: opt.cpu_limit.unwrap(),
+                memory_limit: opt.memory_limit.unwrap(),
                 resource: Some(Resource::TaskSlots(concurrent_tasks as u32)),
             }],
         }),
@@ -423,11 +432,14 @@ pub async fn start_executor_process(
                 }),
                 metadata: Some(ExecutorRegistration {
                     id: executor_id.clone(),
+                    executor_name: opt.executor_name.clone().unwrap(),
                     host: opt.external_host.clone(),
                     port: opt.port as u32,
                     grpc_port: opt.grpc_port as u32,
                     specification: Some(ExecutorSpecification {
                         resources: vec![ExecutorResource {
+                            cpu_limit: opt.cpu_limit.unwrap() as u64,
+                            memory_limit: opt.memory_limit.unwrap() as u64,
                             resource: Some(Resource::TaskSlots(concurrent_tasks as u32)),
                         }],
                     }),

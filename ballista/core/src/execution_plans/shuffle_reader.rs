@@ -560,10 +560,15 @@ mod tests {
                 },
                 executor_meta: ExecutorMetadata {
                     id: "executor_1".to_string(),
+                    executor_name: "executor_1".to_string(),
                     host: "executor_1".to_string(),
                     port: 7070,
                     grpc_port: 8080,
-                    specification: ExecutorSpecification { task_slots: 1 },
+                    specification: ExecutorSpecification {
+                        cpu_limit: 2,
+                        memory_limit: 2,
+                        task_slots: 1,
+                    },
                 },
                 partition_stats: Default::default(),
                 path: "test_path".to_string(),
@@ -686,10 +691,15 @@ mod tests {
                 },
                 executor_meta: ExecutorMetadata {
                     id: format!("exec{partition_id}"),
+                    executor_name: format!("exec{partition_id}"),
                     host: "localhost".to_string(),
                     port: 50051,
                     grpc_port: 50052,
-                    specification: ExecutorSpecification { task_slots: 12 },
+                    specification: ExecutorSpecification {
+                        cpu_limit: 2,
+                        memory_limit: 2,
+                        task_slots: 12,
+                    },
                 },
                 partition_stats: Default::default(),
                 path: path.clone(),

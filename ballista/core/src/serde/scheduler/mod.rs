@@ -76,6 +76,7 @@ pub struct PartitionLocation {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct ExecutorMetadata {
     pub id: String,
+    pub executor_name: String,
     pub host: String,
     pub port: u16,
     pub grpc_port: u16,
@@ -85,6 +86,8 @@ pub struct ExecutorMetadata {
 /// Specification of an executor, indicting executor resources, like total task slots
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 pub struct ExecutorSpecification {
+    pub cpu_limit: u64,
+    pub memory_limit: u64,
     pub task_slots: u32,
 }
 
@@ -92,6 +95,9 @@ pub struct ExecutorSpecification {
 #[derive(Debug, Clone, Serialize)]
 pub struct ExecutorData {
     pub executor_id: String,
+    pub executor_name: String,
+    pub cpu_limit: u64,
+    pub memory_limit: u64,
     pub total_task_slots: u32,
     pub available_task_slots: u32,
 }

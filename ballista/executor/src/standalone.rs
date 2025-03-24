@@ -97,12 +97,15 @@ pub async fn new_standalone_executor_from_builder(
 
     let executor_meta = ExecutorRegistration {
         id: Uuid::new_v4().to_string(), // assign this executor a unique ID
+        executor_name: "standalone_executor".to_string(),
         host: Some("localhost".to_string()),
         port: address.port() as u32,
         // TODO Make it configurable
         grpc_port: 50020,
         specification: Some(
             ExecutorSpecification {
+                cpu_limit: 2,
+                memory_limit: 2,
                 task_slots: concurrent_tasks as u32,
             }
             .into(),

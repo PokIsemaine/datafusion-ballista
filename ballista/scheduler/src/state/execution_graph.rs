@@ -18,7 +18,7 @@
 use std::collections::{HashMap, HashSet};
 use std::convert::TryInto;
 use std::fmt::{Debug, Formatter};
-use std::fs::File;
+use std::fs::OpenOptions;
 use std::io::BufWriter;
 use std::iter::FromIterator;
 use std::sync::Arc;
@@ -726,7 +726,7 @@ impl ExecutionGraph {
                 queued_at: self.queued_at,
                 completed_at: timestamp_millis(),
             });
-            self.execution_to_csv("/data/csv_data/execution_graph.csv")?;
+            self.execution_to_csv("/data/csv_data")?;
         } else if has_resolved {
             events.push(QueryStageSchedulerEvent::JobUpdated(job_id))
         }
@@ -1334,11 +1334,16 @@ impl ExecutionGraph {
         self.failed_stage_attempts.remove(&stage_id);
     }
 
-    pub fn execution_to_csv(&self, file_path: &str) -> Result<()> {
-        // 打开文件并创建一个 CSV 写入器
-        let file = File::create(file_path).map_err(|e| {
-            BallistaError::General(format!("Failed to create file: {}", e))
-        })?;
+    pub fn execution_to_csv(&self, csv_dir_path: &str) -> Result<()> {
+        let file_path = format!("{}/{}.csv", csv_dir_path, self.job_name);
+        info!("Writing execution graph to CSV file: {}", file_path);
+        // 打开文件并以追加模式创建一个 CSV 写入器
+        let file = OpenOptions::new()
+            .create(true)
+            .write(true)
+            .truncate(true)
+            .open(file_path)
+            .map_err(|e| BallistaError::General(format!("Failed to open or create file: {}", e)))?;
         let mut writer = csv::Writer::from_writer(BufWriter::new(file));
 
         // 写入 CSV 表头

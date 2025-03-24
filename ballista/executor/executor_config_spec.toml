@@ -143,3 +143,18 @@ name = "executor_heartbeat_interval_seconds"
 type = "u64"
 doc = "The heartbeat interval in seconds to the scheduler for push-based task scheduling"
 default = "60"
+
+[[param]]
+name = "cpu_limit"
+type = "u64"
+doc = "cpu number limit"
+
+[[param]]
+name = "memory_limit"
+type = "u64"
+doc = "memory limit (unit GB)"
+
+[[param]]
+name = "executor_name"
+type = "String"
+doc = "executor docker instance name"

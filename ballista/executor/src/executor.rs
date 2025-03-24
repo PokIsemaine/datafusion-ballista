@@ -356,6 +356,7 @@ mod test {
 
         let executor_registration = ExecutorRegistration {
             id: "executor".to_string(),
+            executor_name: "executor_name".to_string(),
             port: 0,
             grpc_port: 0,
             specification: None,

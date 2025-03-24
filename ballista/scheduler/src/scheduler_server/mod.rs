@@ -311,8 +311,11 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerServer<T
         info!("有新的Executor注册: {metadata:?}");
         let executor_data = ExecutorData {
             executor_id: metadata.id.clone(),
+            executor_name: metadata.executor_name.clone(),
             total_task_slots: metadata.specification.task_slots,
             available_task_slots: metadata.specification.task_slots,
+            cpu_limit: metadata.specification.cpu_limit,
+            memory_limit: metadata.specification.memory_limit,
         };
 
         // Save the executor to state
@@ -673,31 +676,45 @@ mod test {
             (
                 ExecutorMetadata {
                     id: "executor-1".to_string(),
+                    executor_name: "executor-1".to_string(),
                     host: "localhost1".to_string(),
                     port: 8080,
                     grpc_port: 9090,
-                    specification: ExecutorSpecification { task_slots },
+                    specification: ExecutorSpecification {
+                        task_slots,
+                        cpu_limit: 2,
+                        memory_limit: 2,
+                    },
                 },
                 ExecutorData {
                     executor_id: "executor-1".to_owned(),
+                    executor_name: "executor-1".to_owned(),
                     total_task_slots: task_slots,
                     available_task_slots: task_slots,
+                    cpu_limit: 2,
+                    memory_limit: 2,
                 },
             ),
             (
                 ExecutorMetadata {
                     id: "executor-2".to_string(),
+                    executor_name: "executor-2".to_string(),
                     host: "localhost2".to_string(),
                     port: 8080,
                     grpc_port: 9090,
                     specification: ExecutorSpecification {
                         task_slots: num_partitions as u32 - task_slots,
+                        cpu_limit: 2,
+                        memory_limit: 2,
                     },
                 },
                 ExecutorData {
                     executor_id: "executor-2".to_owned(),
+                    executor_name: "executor-2".to_owned(),
                     total_task_slots: num_partitions as u32 - task_slots,
                     available_task_slots: num_partitions as u32 - task_slots,
+                    cpu_limit: 2,
+                    memory_limit: 2,
                 },
             ),
         ]

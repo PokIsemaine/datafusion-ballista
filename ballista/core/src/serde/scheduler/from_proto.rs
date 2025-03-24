@@ -230,6 +230,7 @@ impl Into<ExecutorMetadata> for protobuf::ExecutorMetadata {
     fn into(self) -> ExecutorMetadata {
         ExecutorMetadata {
             id: self.id,
+            executor_name: self.executor_name,
             host: self.host,
             port: self.port as u16,
             grpc_port: self.grpc_port as u16,
@@ -241,13 +242,19 @@ impl Into<ExecutorMetadata> for protobuf::ExecutorMetadata {
 #[allow(clippy::from_over_into)]
 impl Into<ExecutorSpecification> for protobuf::ExecutorSpecification {
     fn into(self) -> ExecutorSpecification {
-        let mut ret = ExecutorSpecification { task_slots: 0 };
+        let mut ret = ExecutorSpecification {
+            cpu_limit: 0,
+            memory_limit: 0,
+            task_slots: 0,
+        };
         for resource in self.resources {
             if let Some(protobuf::executor_resource::Resource::TaskSlots(task_slots)) =
                 resource.resource
             {
-                ret.task_slots = task_slots
+                ret.task_slots = task_slots;
             }
+            ret.cpu_limit = resource.cpu_limit;
+            ret.memory_limit = resource.memory_limit;
         }
         ret
     }
@@ -258,6 +265,9 @@ impl Into<ExecutorData> for protobuf::ExecutorData {
     fn into(self) -> ExecutorData {
         let mut ret = ExecutorData {
             executor_id: self.executor_id,
+            executor_name: self.executor_name,
+            cpu_limit: 0,
+            memory_limit: 0,
             total_task_slots: 0,
             available_task_slots: 0,
         };

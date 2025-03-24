@@ -911,9 +911,9 @@ impl Debug for SuccessfulStage {
             write!(f, "{:?}\n", task)?;
         }
         // stage_info
-        write!(
+        writeln!(
             f,
-            "stage total time: {}\n",
+            "stage total time: {}",
             max_finish_time - min_scheduled_time
         )?;
         Ok(())

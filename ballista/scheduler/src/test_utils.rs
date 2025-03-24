@@ -435,16 +435,22 @@ impl SchedulerTest {
         for (executor_id, VirtualExecutor { task_slots, .. }) in executors {
             let metadata = ExecutorMetadata {
                 id: executor_id.clone(),
+                executor_name: "scheduler-test".to_owned(),
                 host: String::default(),
                 port: 0,
                 grpc_port: 0,
                 specification: ExecutorSpecification {
+                    cpu_limit: 2,
+                    memory_limit: 2,
                     task_slots: task_slots as u32,
                 },
             };
 
             let executor_data = ExecutorData {
                 executor_id,
+                executor_name: "scheduler-test".to_owned(),
+                cpu_limit: 2,
+                memory_limit: 2,
                 total_task_slots: task_slots as u32,
                 available_task_slots: task_slots as u32,
             };
@@ -1101,10 +1107,15 @@ pub async fn test_union_plan(partition: usize) -> ExecutionGraph {
 pub fn mock_executor(executor_id: String) -> ExecutorMetadata {
     ExecutorMetadata {
         id: executor_id,
+        executor_name: "mock_executor".to_string(),
         host: "localhost2".to_string(),
         port: 8080,
         grpc_port: 9090,
-        specification: ExecutorSpecification { task_slots: 1 },
+        specification: ExecutorSpecification {
+            task_slots: 1,
+            cpu_limit: 2,
+            memory_limit: 2,
+        },
     }
 }
 
