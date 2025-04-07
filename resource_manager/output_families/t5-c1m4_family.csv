@@ -1,0 +1,4 @@
+Series,Family,InstanceType,CPU,Memory,Price
+tcm,t5-c1m4,ecs.t5-c1m4.large,2,8.0,0.4936
+tcm,t5-c1m4,ecs.t5-c1m4.xlarge,4,16.0,0.9679
+tcm,t5-c1m4,ecs.t5-c1m4.2xlarge,8,32.0,1.9258

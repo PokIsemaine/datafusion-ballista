@@ -1,0 +1,4 @@
+Series,Family,InstanceType,CPU,Memory,Price
+dc,d2c,ecs.d2c.6xlarge,24,88.0,15.78792
+dc,d2c,ecs.d2c.12xlarge,48,176.0,31.56584
+dc,d2c,ecs.d2c.24xlarge,96,352.0,63.11545

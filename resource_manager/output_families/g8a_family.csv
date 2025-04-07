@@ -1,0 +1,11 @@
+Series,Family,InstanceType,CPU,Memory,Price
+ga,g8a,ecs.g8a.large,2,8.0,
+ga,g8a,ecs.g8a.xlarge,4,16.0,
+ga,g8a,ecs.g8a.2xlarge,8,32.0,
+ga,g8a,ecs.g8a.4xlarge,16,64.0,
+ga,g8a,ecs.g8a.8xlarge,32,128.0,
+ga,g8a,ecs.g8a.12xlarge,48,192.0,
+ga,g8a,ecs.g8a.16xlarge,64,256.0,
+ga,g8a,ecs.g8a.24xlarge,96,384.0,
+ga,g8a,ecs.g8a.32xlarge,128,512.0,
+ga,g8a,ecs.g8a.48xlarge,192,768.0,

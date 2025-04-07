@@ -1,0 +1,4 @@
+Series,Family,InstanceType,CPU,Memory,Price
+gnex,g7nex,ecs.g7nex.large,2,8.0,
+gnex,g7nex,ecs.g7nex.xlarge,4,16.0,
+gnex,g7nex,ecs.g7nex.2xlarge,8,32.0,

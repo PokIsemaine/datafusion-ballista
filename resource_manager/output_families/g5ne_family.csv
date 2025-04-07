@@ -1,0 +1,8 @@
+Series,Family,InstanceType,CPU,Memory,Price
+gne,g5ne,ecs.g5ne.large,2,8.0,0.90537244
+gne,g5ne,ecs.g5ne.xlarge,4,16.0,1.8007449
+gne,g5ne,ecs.g5ne.2xlarge,8,32.0,3.6056
+gne,g5ne,ecs.g5ne.4xlarge,16,64.0,7.2012
+gne,g5ne,ecs.g5ne.8xlarge,32,128.0,14.3924
+gne,g5ne,ecs.g5ne.16xlarge,64,256.0,28.7748
+gne,g5ne,ecs.g5ne.18xlarge,72,288.0,32.3704

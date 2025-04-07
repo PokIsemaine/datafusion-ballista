@@ -1,0 +1,3 @@
+Series,Family,InstanceType,CPU,Memory,Price
+gncg,gn5-c28g1,ecs.gn5-c28g1.7xlarge,28,112.0,1.8748
+gncg,gn5-c28g1,ecs.gn5-c28g1.14xlarge,56,224.0,3.7396

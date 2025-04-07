@@ -1,0 +1,4 @@
+Series,Family,InstanceType,CPU,Memory,Price
+ecm,e-c1m2,ecs.e-c1m2.large,2,4.0,
+ecm,e-c1m2,ecs.e-c1m2.xlarge,4,8.0,
+ecm,e-c1m2,ecs.e-c1m2.2xlarge,8,16.0,

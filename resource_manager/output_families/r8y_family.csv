@@ -1,0 +1,8 @@
+Series,Family,InstanceType,CPU,Memory,Price
+ry,r8y,ecs.r8y.small,1,8.0,
+ry,r8y,ecs.r8y.large,2,16.0,
+ry,r8y,ecs.r8y.xlarge,4,32.0,
+ry,r8y,ecs.r8y.2xlarge,8,64.0,
+ry,r8y,ecs.r8y.4xlarge,16,128.0,
+ry,r8y,ecs.r8y.8xlarge,32,256.0,
+ry,r8y,ecs.r8y.16xlarge,64,512.0,

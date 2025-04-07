@@ -1,0 +1,7 @@
+Series,Family,InstanceType,CPU,Memory,Price
+n,n4,ecs.n4.small,1,2.0,0.219
+n,n4,ecs.n4.large,2,4.0,0.428
+n,n4,ecs.n4.xlarge,4,8.0,1.189
+n,n4,ecs.n4.2xlarge,8,16.0,2.368
+n,n4,ecs.n4.4xlarge,16,32.0,4.726
+n,n4,ecs.n4.8xlarge,32,64.0,9.435

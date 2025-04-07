@@ -1,0 +1,10 @@
+Series,Family,InstanceType,CPU,Memory,Price
+ra,r8a,ecs.r8a.large,2,16.0,
+ra,r8a,ecs.r8a.xlarge,4,32.0,
+ra,r8a,ecs.r8a.2xlarge,8,64.0,
+ra,r8a,ecs.r8a.4xlarge,16,128.0,
+ra,r8a,ecs.r8a.8xlarge,32,256.0,
+ra,r8a,ecs.r8a.12xlarge,48,384.0,
+ra,r8a,ecs.r8a.16xlarge,64,512.0,
+ra,r8a,ecs.r8a.24xlarge,96,768.0,
+ra,r8a,ecs.r8a.32xlarge,128,1024.0,

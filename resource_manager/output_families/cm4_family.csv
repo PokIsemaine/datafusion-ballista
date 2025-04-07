@@ -1,0 +1,6 @@
+Series,Family,InstanceType,CPU,Memory,Price
+cm,cm4,ecs.cm4.xlarge,4,16.0,2.03
+cm,cm4,ecs.cm4.2xlarge,8,32.0,4.12
+cm,cm4,ecs.cm4.3xlarge,12,48.0,6.07
+cm,cm4,ecs.cm4.4xlarge,16,64.0,8.23
+cm,cm4,ecs.cm4.6xlarge,24,96.0,12.34

@@ -1,0 +1,8 @@
+Series,Family,InstanceType,CPU,Memory,Price
+i,i1,ecs.i1.xlarge,4,16.0,1.79
+i,i1,ecs.i1.2xlarge,8,32.0,3.58
+i,i1,ecs.i1.3xlarge,12,48.0,5.35
+i,i1,ecs.i1.4xlarge,16,64.0,7.15
+i,i1,ecs.i1.6xlarge,24,96.0,10.69
+i,i1,ecs.i1.8xlarge,32,128.0,14.29
+i,i1,ecs.i1.14xlarge,56,224.0,24.88

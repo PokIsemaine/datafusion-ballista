@@ -1,0 +1,2 @@
+Series,Family,InstanceType,CPU,Memory,Price
+ebmc,ebmc6,ecs.ebmc6.26xlarge,104,192.0,34.85

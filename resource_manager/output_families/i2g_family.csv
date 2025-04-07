@@ -1,0 +1,5 @@
+Series,Family,InstanceType,CPU,Memory,Price
+ig,i2g,ecs.i2g.2xlarge,8,32.0,3.14814
+ig,i2g,ecs.i2g.4xlarge,16,64.0,6.28628
+ig,i2g,ecs.i2g.8xlarge,32,128.0,12.56256
+ig,i2g,ecs.i2g.16xlarge,64,256.0,25.11512

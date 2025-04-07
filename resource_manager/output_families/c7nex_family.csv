@@ -1,0 +1,5 @@
+Series,Family,InstanceType,CPU,Memory,Price
+cnex,c7nex,ecs.c7nex.large,2,4.0,
+cnex,c7nex,ecs.c7nex.xlarge,4,8.0,
+cnex,c7nex,ecs.c7nex.2xlarge,8,16.0,
+cnex,c7nex,ecs.c7nex.4xlarge,16,32.0,

@@ -1,0 +1,2 @@
+Series,Family,InstanceType,CPU,Memory,Price
+ebmc,ebmc7,ecs.ebmc7.32xlarge,128,256.0,

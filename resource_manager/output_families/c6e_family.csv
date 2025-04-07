@@ -1,0 +1,8 @@
+Series,Family,InstanceType,CPU,Memory,Price
+ce,c6e,ecs.c6e.large,2,4.0,
+ce,c6e,ecs.c6e.xlarge,4,8.0,
+ce,c6e,ecs.c6e.2xlarge,8,16.0,
+ce,c6e,ecs.c6e.4xlarge,16,32.0,
+ce,c6e,ecs.c6e.8xlarge,32,64.0,
+ce,c6e,ecs.c6e.13xlarge,52,96.0,
+ce,c6e,ecs.c6e.26xlarge,104,192.0,

@@ -1,0 +1,7 @@
+Series,Family,InstanceType,CPU,Memory,Price
+ucm,u1-c1m8,ecs.u1-c1m8.large,2,16.0,
+ucm,u1-c1m8,ecs.u1-c1m8.xlarge,4,32.0,
+ucm,u1-c1m8,ecs.u1-c1m8.2xlarge,8,64.0,
+ucm,u1-c1m8,ecs.u1-c1m8.3xlarge,12,96.0,
+ucm,u1-c1m8,ecs.u1-c1m8.4xlarge,16,128.0,
+ucm,u1-c1m8,ecs.u1-c1m8.8xlarge,32,256.0,

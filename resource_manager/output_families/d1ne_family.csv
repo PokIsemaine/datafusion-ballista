@@ -1,0 +1,6 @@
+Series,Family,InstanceType,CPU,Memory,Price
+dne,d1ne,ecs.d1ne.2xlarge,8,32.0,5.482
+dne,d1ne,ecs.d1ne.4xlarge,16,64.0,10.961
+dne,d1ne,ecs.d1ne.6xlarge,24,96.0,16.433
+dne,d1ne,ecs.d1ne.8xlarge,32,128.0,21.912
+dne,d1ne,ecs.d1ne.14xlarge,56,224.0,38.327

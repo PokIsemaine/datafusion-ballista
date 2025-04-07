@@ -1,0 +1,5 @@
+Series,Family,InstanceType,CPU,Memory,Price
+tcm,t5-c1m1,ecs.t5-c1m1.large,2,2.0,0.2146
+tcm,t5-c1m1,ecs.t5-c1m1.xlarge,4,4.0,0.4192
+tcm,t5-c1m1,ecs.t5-c1m1.2xlarge,8,8.0,0.8284
+tcm,t5-c1m1,ecs.t5-c1m1.4xlarge,16,16.0,1.6375

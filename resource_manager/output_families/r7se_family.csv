@@ -1,0 +1,9 @@
+Series,Family,InstanceType,CPU,Memory,Price
+rse,r7se,ecs.r7se.large,2,16.0,
+rse,r7se,ecs.r7se.xlarge,4,32.0,
+rse,r7se,ecs.r7se.2xlarge,8,64.0,
+rse,r7se,ecs.r7se.3xlarge,12,96.0,
+rse,r7se,ecs.r7se.4xlarge,16,128.0,
+rse,r7se,ecs.r7se.6xlarge,24,192.0,
+rse,r7se,ecs.r7se.8xlarge,32,256.0,
+rse,r7se,ecs.r7se.16xlarge,64,512.0,

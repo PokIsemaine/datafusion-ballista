@@ -1,0 +1,5 @@
+Series,Family,InstanceType,CPU,Memory,Price
+sn,sn1,ecs.sn1.medium,2,4.0,0.669
+sn,sn1,ecs.sn1.large,4,8.0,1.333
+sn,sn1,ecs.sn1.xlarge,8,16.0,2.655
+sn,sn1,ecs.sn1.3xlarge,16,32.0,5.281

@@ -1,0 +1,10 @@
+Series,Family,InstanceType,CPU,Memory,Price
+hfci,hfc8i,ecs.hfc8i.large,2,4.0,
+hfci,hfc8i,ecs.hfc8i.xlarge,4,8.0,
+hfci,hfc8i,ecs.hfc8i.2xlarge,8,16.0,
+hfci,hfc8i,ecs.hfc8i.3xlarge,12,24.0,
+hfci,hfc8i,ecs.hfc8i.4xlarge,16,32.0,
+hfci,hfc8i,ecs.hfc8i.6xlarge,24,48.0,
+hfci,hfc8i,ecs.hfc8i.8xlarge,32,64.0,
+hfci,hfc8i,ecs.hfc8i.16xlarge,64,128.0,
+hfci,hfc8i,ecs.hfc8i.32xlarge,128,256.0,

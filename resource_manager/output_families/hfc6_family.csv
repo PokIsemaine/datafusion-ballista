@@ -1,0 +1,11 @@
+Series,Family,InstanceType,CPU,Memory,Price
+hfc,hfc6,ecs.hfc6.large,2,4.0,0.6953
+hfc,hfc6,ecs.hfc6.xlarge,4,8.0,1.3806
+hfc,hfc6,ecs.hfc6.2xlarge,8,16.0,2.7512
+hfc,hfc6,ecs.hfc6.3xlarge,12,24.0,4.1218
+hfc,hfc6,ecs.hfc6.4xlarge,16,32.0,5.4924
+hfc,hfc6,ecs.hfc6.6xlarge,24,48.0,8.2336
+hfc,hfc6,ecs.hfc6.8xlarge,32,64.0,10.9748
+hfc,hfc6,ecs.hfc6.10xlarge,40,96.0,13.716
+hfc,hfc6,ecs.hfc6.16xlarge,64,128.0,21.9396
+hfc,hfc6,ecs.hfc6.20xlarge,80,192.0,27.422

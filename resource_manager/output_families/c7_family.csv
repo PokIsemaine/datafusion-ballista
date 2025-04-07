@@ -1,0 +1,10 @@
+Series,Family,InstanceType,CPU,Memory,Price
+c,c7,ecs.c7.large,2,4.0,
+c,c7,ecs.c7.xlarge,4,8.0,
+c,c7,ecs.c7.2xlarge,8,16.0,
+c,c7,ecs.c7.3xlarge,12,24.0,
+c,c7,ecs.c7.4xlarge,16,32.0,
+c,c7,ecs.c7.6xlarge,24,48.0,
+c,c7,ecs.c7.8xlarge,32,64.0,
+c,c7,ecs.c7.16xlarge,64,128.0,
+c,c7,ecs.c7.32xlarge,128,256.0,

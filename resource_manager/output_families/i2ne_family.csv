@@ -1,0 +1,7 @@
+Series,Family,InstanceType,CPU,Memory,Price
+ine,i2ne,ecs.i2ne.xlarge,4,32.0,2.2675
+ine,i2ne,ecs.i2ne.2xlarge,8,64.0,4.525
+ine,i2ne,ecs.i2ne.4xlarge,16,128.0,9.04
+ine,i2ne,ecs.i2ne.8xlarge,32,256.0,18.07
+ine,i2ne,ecs.i2ne.16xlarge,64,512.0,36.13
+ine,i2ne,ecs.i2ne.20xlarge,80,704.0,45.16

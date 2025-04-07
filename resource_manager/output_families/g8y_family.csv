@@ -1,0 +1,8 @@
+Series,Family,InstanceType,CPU,Memory,Price
+gy,g8y,ecs.g8y.small,1,4.0,
+gy,g8y,ecs.g8y.large,2,8.0,
+gy,g8y,ecs.g8y.xlarge,4,16.0,
+gy,g8y,ecs.g8y.2xlarge,8,32.0,
+gy,g8y,ecs.g8y.4xlarge,16,64.0,
+gy,g8y,ecs.g8y.8xlarge,32,128.0,
+gy,g8y,ecs.g8y.16xlarge,64,256.0,

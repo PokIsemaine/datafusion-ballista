@@ -1,0 +1,10 @@
+Series,Family,InstanceType,CPU,Memory,Price
+r,r6,ecs.r6.large,2,16.0,1.0157
+r,r6,ecs.r6.xlarge,4,32.0,2.0214
+r,r6,ecs.r6.2xlarge,8,64.0,4.0328
+r,r6,ecs.r6.3xlarge,12,96.0,6.0442
+r,r6,ecs.r6.4xlarge,16,128.0,8.0556
+r,r6,ecs.r6.6xlarge,24,192.0,12.0784
+r,r6,ecs.r6.8xlarge,32,256.0,16.1012
+r,r6,ecs.r6.13xlarge,52,384.0,26.1582
+r,r6,ecs.r6.26xlarge,104,768.0,52.3064

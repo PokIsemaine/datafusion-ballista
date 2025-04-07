@@ -1,0 +1,5 @@
+Series,Family,InstanceType,CPU,Memory,Price
+igne,i2gne,ecs.i2gne.2xlarge,8,32.0,3.30567
+igne,i2gne,ecs.i2gne.4xlarge,16,64.0,6.60134
+igne,i2gne,ecs.i2gne.8xlarge,32,128.0,13.1909
+igne,i2gne,ecs.i2gne.16xlarge,64,256.0,26.37536

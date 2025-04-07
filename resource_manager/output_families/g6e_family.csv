@@ -1,0 +1,7 @@
+Series,Family,InstanceType,CPU,Memory,Price
+ge,g6e,ecs.g6e.large,2,8.0,
+ge,g6e,ecs.g6e.xlarge,4,16.0,
+ge,g6e,ecs.g6e.2xlarge,8,32.0,
+ge,g6e,ecs.g6e.4xlarge,16,64.0,
+ge,g6e,ecs.g6e.8xlarge,32,128.0,
+ge,g6e,ecs.g6e.13xlarge,52,192.0,

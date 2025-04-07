@@ -1,0 +1,9 @@
+Series,Family,InstanceType,CPU,Memory,Price
+gse,g7se,ecs.g7se.large,2,8.0,
+gse,g7se,ecs.g7se.xlarge,4,16.0,
+gse,g7se,ecs.g7se.2xlarge,8,32.0,
+gse,g7se,ecs.g7se.3xlarge,12,48.0,
+gse,g7se,ecs.g7se.4xlarge,16,64.0,
+gse,g7se,ecs.g7se.6xlarge,24,96.0,
+gse,g7se,ecs.g7se.8xlarge,32,128.0,
+gse,g7se,ecs.g7se.16xlarge,64,256.0,

@@ -1,0 +1,6 @@
+Series,Family,InstanceType,CPU,Memory,Price
+snne,sn1ne,ecs.sn1ne.large,2,4.0,0.702
+snne,sn1ne,ecs.sn1ne.xlarge,4,8.0,1.4
+snne,sn1ne,ecs.sn1ne.2xlarge,8,16.0,2.788
+snne,sn1ne,ecs.sn1ne.3xlarge,12,24.0,4.162
+snne,sn1ne,ecs.sn1ne.4xlarge,16,32.0,5.545

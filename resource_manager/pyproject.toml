@@ -8,7 +8,9 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "alibabacloud-ecs20140526 (>=6.1.0,<7.0.0)"
+    "alibabacloud-ecs20140526 (>=6.1.0,<7.0.0)",
+    "docker (>=7.1.0,<8.0.0)",
+    "pandas (>=2.2.3,<3.0.0)"
 ]
 
 [tool.poetry]

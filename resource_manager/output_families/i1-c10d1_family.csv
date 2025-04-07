@@ -1,0 +1,2 @@
+Series,Family,InstanceType,CPU,Memory,Price
+icd,i1-c10d1,ecs.i1-c10d1.8xlarge,32,128.0,15.27
