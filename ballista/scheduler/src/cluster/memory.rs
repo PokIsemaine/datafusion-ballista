@@ -46,6 +46,8 @@ use datafusion::physical_plan::ExecutionPlan;
 use std::sync::Arc;
 use tokio::sync::{Mutex, MutexGuard};
 
+use super::bind_task_gen_policy;
+
 #[derive(Default)]
 pub struct InMemoryClusterState {
     /// Current available task slots for each executor
@@ -168,6 +170,15 @@ impl ClusterState for InMemoryClusterState {
                     }
                 }
                 bound_tasks
+            }
+            TaskDistributionPolicy::GeneratedPolicy {
+                gen_policy,
+            } => {
+                bind_task_gen_policy(available_slots, active_jobs, gen_policy).await
+            }
+            TaskDistributionPolicy::ResourceAware{..} => {
+                return Err(BallistaError::NotImplemented(
+                    "ResourceAware TaskDistribution is not feasible for push-based task scheduling".to_string()))
             }
         };
 

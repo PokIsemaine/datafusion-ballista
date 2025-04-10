@@ -28,7 +28,7 @@ use datafusion::error::DataFusionError;
 use datafusion::physical_plan::ExecutionPlan;
 use datafusion::prelude::{SessionConfig, SessionContext};
 use futures::Stream;
-use log::{debug, info, warn};
+use log::{debug, error, info, warn};
 
 use ballista_core::config::BallistaConfig;
 use ballista_core::consistent_hash::ConsistentHash;
@@ -493,6 +493,108 @@ pub(crate) async fn bind_task_round_robin(
                 if total_slots == 0 {
                     return schedulable_tasks;
                 }
+            }
+        }
+    }
+
+    schedulable_tasks
+}
+
+pub(crate) async fn bind_task_gen_policy(
+    slots: Vec<&mut AvailableTaskSlots>,
+    active_jobs: Arc<HashMap<String, JobInfoCache>>,
+    gen_policy: String,
+) -> Vec<BoundTask> {
+    let mut schedulable_tasks: Vec<BoundTask> = vec![];
+
+    let total_slots = slots.iter().fold(0, |acc, s| acc + s.slots);
+    if total_slots == 0 {
+        warn!("Not enough available executor slots for task running!!!");
+        return schedulable_tasks;
+    }
+    info!("Total slot number is {}", total_slots);
+
+    if active_jobs.len() > 1 {
+        error!("There are more than one active jobs, stop binding tasks");
+        return schedulable_tasks;
+    }
+
+    // 获取所有可用的执行器
+    let mut available_executors = vec![];
+    for slot in slots.iter() {
+        if slot.slots > 0 {
+            available_executors.push(slot.executor_id.clone());
+        }
+    }
+    if available_executors.len() != 2 {
+        error!("Available executors are not 2, stop binding tasks");
+        return schedulable_tasks;
+    }
+
+    // 解析 gen_policy
+    // 1000:1, 1001:1, 2000:0, 2001:1, 3000:1, 3001:0, 4000:1
+    // task_id:executor_id
+    let task_assignments: HashMap<usize, usize> = gen_policy
+        .split(',')
+        .map(|s| {
+            let mut parts = s.split(':');
+            let task_id = parts.next().unwrap().parse::<usize>().unwrap();
+            let executor_id = parts.next().unwrap().parse::<usize>().unwrap();
+            (task_id, executor_id)
+        })
+        .collect();
+
+    // 执行器按 id 排序，确保一个 job 内的调度策略是一致的
+    available_executors.sort();
+
+    for (job_id, job_info) in active_jobs.iter() {
+        if !matches!(job_info.status, Some(job_status::Status::Running(_))) {
+            debug!(
+                "Job {} is not in running status and will be skipped",
+                job_id
+            );
+            continue;
+        }
+        let mut graph = job_info.execution_graph.write().await;
+        let session_id = graph.session_id().to_string();
+        let black_list = vec![];
+        while let Some((running_stage, task_id_gen)) =
+            graph.fetch_running_stage(&black_list)
+        {
+            // We are sure that it will at least bind one task by going through the following logic.
+            // It will not go into a dead loop.
+            let runnable_tasks = running_stage
+                .task_infos
+                .iter_mut()
+                .enumerate()
+                .filter(|(_partition, info)| info.is_none())
+                .take(total_slots as usize)
+                .collect::<Vec<_>>();
+
+            for (partition_id, task_info) in runnable_tasks {
+                // 让 task_id 每次执行固定
+                let task_id = running_stage.stage_id * 1000 + partition_id as usize;
+                let executor_idx = task_assignments.get(&task_id).unwrap();
+                let executor_id = available_executors[*executor_idx].clone();
+
+                *task_id_gen += 1;
+                *task_info = Some(create_task_info(executor_id.clone(), task_id));
+
+                let partition = PartitionId {
+                    job_id: job_id.clone(),
+                    stage_id: running_stage.stage_id,
+                    partition_id,
+                };
+                let task_desc = TaskDescription {
+                    session_id: session_id.clone(),
+                    partition,
+                    stage_attempt_num: running_stage.stage_attempt_num,
+                    task_id,
+                    task_attempt: running_stage.task_failure_numbers[partition_id],
+                    plan: running_stage.plan.clone(),
+                    session_config: running_stage.session_config.clone(),
+                };
+                schedulable_tasks.push((executor_id, task_desc));
             }
         }
     }

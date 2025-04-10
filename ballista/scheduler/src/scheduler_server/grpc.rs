@@ -122,6 +122,14 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerGrpc
                     return Err(Status::unimplemented(
                         "ConsistentHash TaskDistribution is not feasible for pull-based task scheduling"))
                 }
+                TaskDistributionPolicy::GeneratedPolicy{..} => {
+                    return Err(Status::unimplemented(
+                        "GeneratedPolicy TaskDistribution is not feasible for pull-based task scheduling"))
+                }
+                TaskDistributionPolicy::ResourceAware{..} => {
+                    return Err(Status::unimplemented(
+                        "ResourceAware TaskDistribution is not feasible for pull-based task scheduling"))
+                }
             };
 
             let mut tasks = vec![];

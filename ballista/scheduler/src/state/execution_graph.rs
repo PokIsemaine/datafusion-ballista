@@ -1343,7 +1343,9 @@ impl ExecutionGraph {
             .write(true)
             .truncate(true)
             .open(file_path)
-            .map_err(|e| BallistaError::General(format!("Failed to open or create file: {}", e)))?;
+            .map_err(|e| {
+                BallistaError::General(format!("Failed to open or create file: {}", e))
+            })?;
         let mut writer = csv::Writer::from_writer(BufWriter::new(file));
 
         // 写入 CSV 表头

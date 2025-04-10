@@ -224,6 +224,8 @@ pub enum TaskDistribution {
     ///    And then bind it with an execute according to consistent hashing policy.
     /// 3. If needed, work stealing can be enabled based on the tolerance of the consistent hashing.
     ConsistentHash,
+    GeneratedPolicy,
+    ResourceAware,
 }
 
 #[cfg(feature = "build-binary")]
@@ -242,7 +244,7 @@ impl configure_me::parse_arg::ParseArgFromStr for TaskDistribution {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Default)]
 pub enum TaskDistributionPolicy {
     /// Eagerly assign tasks to executor slots. This will assign as many task slots per executor
     /// as are currently available
@@ -259,7 +261,12 @@ pub enum TaskDistributionPolicy {
         num_replicas: usize,
         tolerance: usize,
     },
+    GeneratedPolicy {
+        gen_policy: String,
+    },
+    ResourceAware,
 }
+
 #[cfg(feature = "build-binary")]
 impl TryFrom<Config> for SchedulerConfig {
     type Error = ballista_core::error::BallistaError;
@@ -276,6 +283,13 @@ impl TryFrom<Config> for SchedulerConfig {
                     tolerance,
                 }
             }
+            TaskDistribution::GeneratedPolicy => {
+                let gen_policy = opt.gen_policy.unwrap();
+                TaskDistributionPolicy::GeneratedPolicy {
+                    gen_policy: gen_policy,
+                }
+            }
+            TaskDistribution::ResourceAware => TaskDistributionPolicy::ResourceAware,
         };
 
         let config = SchedulerConfig {

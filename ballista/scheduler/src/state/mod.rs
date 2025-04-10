@@ -46,6 +46,7 @@ use datafusion_proto::logical_plan::AsLogicalPlan;
 use datafusion_proto::physical_plan::AsExecutionPlan;
 use log::{debug, error, info, warn};
 use prost::Message;
+use std::path::Path;
 
 pub mod execution_graph;
 pub mod execution_graph_dot;
@@ -278,17 +279,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerState<T,
             }
         }
 
-        // 打印任务分配信息
-        for (executor_id, tasks) in executor_stage_assignments.iter() {
-            for ((job_id, stage_id), tasks) in tasks.iter() {
-                for task in tasks.iter() {
-                    info!(
-                        "Assigning job {} stage {} task {} to executor {}",
-                        job_id, stage_id, task.task_id, executor_id
-                    );
-                }
-            }
-        }
+        self.assign_info_to_csv(&executor_stage_assignments).await?;
 
         let mut join_handles = vec![];
         for (executor_id, tasks) in executor_stage_assignments.into_iter() {
@@ -352,6 +343,111 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerState<T,
             .into_iter()
             .flatten()
             .collect::<Vec<ExecutorSlot>>())
+    }
+
+    async fn assign_info_to_csv(
+        &self,
+        executor_stage_assignments: &HashMap<
+            String,
+            HashMap<(String, usize), Vec<TaskDescription>>,
+        >,
+    ) -> std::result::Result<(), BallistaError> {
+        for (executor_id, tasks) in executor_stage_assignments.iter() {
+            let executor_metadata = self
+                .executor_manager
+                .get_executor_metadata(executor_id)
+                .await?;
+            let cpu_limit = executor_metadata.specification.cpu_limit.to_string();
+            let memory_limit = executor_metadata.specification.memory_limit.to_string();
+
+            for ((job_id, stage_id), tasks) in tasks.iter() {
+                let execution_graph =
+                    self.task_manager.get_job_execution_graph(job_id).await?;
+                let job_name = execution_graph
+                    .as_ref()
+                    .map(|graph| graph.job_name())
+                    .unwrap_or("unknown");
+                let csv_file_path = format!("/data/csv_data/assign_{}.csv", job_name);
+
+                // Ensure parent directories exist
+                if let Some(parent) = Path::new(&csv_file_path).parent() {
+                    std::fs::create_dir_all(parent).map_err(|e| {
+                        BallistaError::IoError(std::io::Error::new(
+                            std::io::ErrorKind::Other,
+                            format!("Failed to create directories: {}", e),
+                        ))
+                    })?;
+                }
+
+                // Check if the file exists to determine whether to write the header
+                let file_exists = Path::new(&csv_file_path).exists();
+
+                // Open the CSV file in append mode
+                let mut writer = csv::WriterBuilder::new()
+                    .has_headers(false) // Disable automatic header writing
+                    .from_writer(
+                        std::fs::OpenOptions::new()
+                            .create(true)
+                            .append(true)
+                            .open(&csv_file_path)
+                            .map_err(|e| {
+                                BallistaError::IoError(std::io::Error::new(
+                                    std::io::ErrorKind::Other,
+                                    format!("CSV writer creation error: {}", e),
+                                ))
+                            })?,
+                    );
+
+                // Write header only if the file does not exist
+                if !file_exists {
+                    writer
+                        .write_record(&[
+                            "job_id",
+                            "job_name",
+                            "stage_id",
+                            "task_id",
+                            "executor_id",
+                            "cpu_limit",
+                            "memory_limit",
+                        ])
+                        .map_err(|e| {
+                            BallistaError::IoError(std::io::Error::new(
+                                std::io::ErrorKind::Other,
+                                format!("CSV write error: {}", e),
+                            ))
+                        })?;
+                }
+
+                // Write task records
+                for task in tasks {
+                    writer
+                        .write_record(&[
+                            job_id,
+                            job_name,
+                            &stage_id.to_string(),
+                            &task.task_id.to_string(),
+                            executor_id,
+                            &cpu_limit,
+                            &memory_limit,
+                        ])
+                        .map_err(|e| {
+                            BallistaError::IoError(std::io::Error::new(
+                                std::io::ErrorKind::Other,
+                                format!("CSV write error: {}", e),
+                            ))
+                        })?;
+                }
+
+                // Ensure data is flushed to the file
+                writer.flush().map_err(|e| {
+                    BallistaError::IoError(std::io::Error::new(
+                        std::io::ErrorKind::Other,
+                        format!("CSV flush error: {}", e),
+                    ))
+                })?;
+            }
+        }
+        Ok(())
     }
 
     pub(crate) async fn update_task_statuses(

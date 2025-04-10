@@ -1,4 +1,3 @@
-#!/bin/bash
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements.  See the NOTICE file
 # distributed with this work for additional information
@@ -16,26 +15,21 @@
 # specific language governing permissions and limitations
 # under the License.
 
-mkdir -p data/answers 2>/dev/null
+FROM ubuntu:24.04
 
-set -e
+ARG RELEASE_FLAG=release
 
-pushd ..
-. ./dev/build-set-env.sh
-popd
+ENV RELEASE_FLAG=${RELEASE_FLAG}
+ENV RUST_LOG=info
+ENV RUST_BACKTRACE=full
 
-# Generate data into the ./data directory if it does not already exist
-FILE=./data/supplier.tbl
-if test -f "$FILE"; then
-    echo "$FILE exists."
-else
-  docker run -v `pwd`/data:/data -it --rm ghcr.io/scalytics/tpch-docker:main -vf -s 10
-fi
+COPY target/$RELEASE_FLAG/ballista-scheduler /root/ballista-scheduler
+COPY target/$RELEASE_FLAG/ballista-executor /root/ballista-executor
+COPY target/$RELEASE_FLAG/tpch /root/tpch
 
-# Copy expected answers into the ./data/answers directory if it does not already exist
-FILE=./data/answers/q1.out
-if test -f "$FILE"; then
-    echo "$FILE exists."
-else
-  docker run -v `pwd`/data:/data -it --entrypoint /bin/bash --rm ghcr.io/scalytics/tpch-docker:main -c "cp /opt/tpch/2.18.0_rc2/dbgen/answers/* /data/answers/"
-fi
+COPY benchmarks/run_q19.sh /root/run_q19.sh
+COPY benchmarks/queries/ /root/benchmarks/queries
+
+WORKDIR /root
+
+ENTRYPOINT ["/root/run_q19.sh"]

@@ -85,7 +85,7 @@ impl ExecutorManager {
         }
         self.cluster_state
             .bind_schedulable_tasks(
-                self.config.task_distribution,
+                self.config.task_distribution.clone(),
                 active_jobs,
                 Some(alive_executors),
             )
