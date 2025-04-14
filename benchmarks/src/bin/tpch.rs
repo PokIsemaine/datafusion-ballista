@@ -107,11 +107,11 @@ struct BallistaBenchmarkOpt {
     #[structopt(short = "n", long = "partitions", default_value = "2")]
     partitions: usize,
 
-    /// Ballista executor host
+    /// Ballista executor host   scheduler?
     #[structopt(long = "host")]
     host: Option<String>,
 
-    /// Ballista executor port
+    /// Ballista executor port   scheduler?
     #[structopt(long = "port")]
     port: Option<u16>,
 
@@ -553,7 +553,7 @@ fn get_query_sql_by_path(query: usize, mut sql_path: String) -> Result<String> {
     if sql_path.ends_with('/') {
         sql_path.pop();
     }
-    if query > 0 && query < 23 {
+    if query > 0 && query < 24 {
         let filename = format!("{sql_path}/q{query}.sql");
         Ok(fs::read_to_string(filename).expect("failed to read query"))
     } else {
@@ -639,7 +639,7 @@ fn find_path(path: &str, table: &str, ext: &str) -> Result<String> {
 
 /// Get the SQL statements from the specified query file
 fn get_query_sql(query: usize) -> Result<Vec<String>> {
-    if query > 0 && query < 23 {
+    if query > 0 && query < 24 {
         let possibilities = vec![
             format!("queries/q{query}.sql"),
             format!("benchmarks/queries/q{query}.sql"),

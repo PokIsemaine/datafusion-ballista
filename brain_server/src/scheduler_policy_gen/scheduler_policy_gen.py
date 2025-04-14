@@ -1,8 +1,21 @@
 import itertools
 
-tpch_q6_tasks = [1000, 1001, 2000]
-tpch_q19_tasks = [1000, 1001, 2000, 2001, 3000, 3001, 4000]
+# query_id : [tasks]
+tpch_tasks = {
+    6: [1000, 1001, 2000],
+    19: [1000, 1001, 2000, 2001, 3000, 3001, 4000],
+}
 
+click_bench_2p_tasks = {
+    20: [1000],
+    21: [1000, 1001, 2000, 2001, 3000],
+    22: [1000, 1001, 2000, 2001, 3000],
+    30: [1000, 1001, 2000, 2001, 3000],
+    31: [1000, 1001, 2000, 2001, 3000],
+    32: [1000, 1001, 2000, 2001, 3000],
+    33: [1000, 1001, 2000, 2001, 3000],
+    40: [1000, 1001, 2000, 2001, 3000],
+}
 def generate_task_assignments(tasks, executors, output_file):
     """
     枚举所有任务分配到 executors 的可能性，并存储到指定的 shell 脚本文件中。
@@ -34,7 +47,7 @@ if __name__ == "__main__":
     executors = ['0', '1']
 
     # 输出文件名
-    output_file = "./q19_task_assignments.sh"
+    output_file = "./q6_task_assignments.sh"
 
     # 生成任务分配可能性
-    generate_task_assignments(tpch_q19_tasks, executors, output_file)
+    generate_task_assignments(tpch_tasks[6], executors, output_file)

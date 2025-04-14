@@ -27,9 +27,9 @@ COPY target/$RELEASE_FLAG/ballista-scheduler /root/ballista-scheduler
 COPY target/$RELEASE_FLAG/ballista-executor /root/ballista-executor
 COPY target/$RELEASE_FLAG/tpch /root/tpch
 
-COPY benchmarks/run_q19.sh /root/run_q19.sh
+COPY benchmarks/run_query.sh /root/run_query.sh
 COPY benchmarks/queries/ /root/benchmarks/queries
 
 WORKDIR /root
 
-ENTRYPOINT ["/root/run_q19.sh"]
+ENTRYPOINT ["/root/run_query.sh"]

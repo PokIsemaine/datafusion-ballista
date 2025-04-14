@@ -1,3 +1,7 @@
 data
 data1G
 data10G
+data100G
+clickbench_data
+tpcds_data
+tpcds_data_parquet

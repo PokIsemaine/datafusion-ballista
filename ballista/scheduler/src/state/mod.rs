@@ -367,7 +367,9 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerState<T,
                     .as_ref()
                     .map(|graph| graph.job_name())
                     .unwrap_or("unknown");
-                let csv_file_path = format!("/data/csv_data/assign_{}.csv", job_name);
+
+                // let csv_file_path = format!("/data/csv_data/assign_{}.csv", job_name);
+                let csv_file_path = format!("/home/zsl/datafusion-ballista/benchmarks/clickbench_data/csv_data/assign_{}.csv", job_name);
 
                 // Ensure parent directories exist
                 if let Some(parent) = Path::new(&csv_file_path).parent() {

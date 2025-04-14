@@ -726,7 +726,10 @@ impl ExecutionGraph {
                 queued_at: self.queued_at,
                 completed_at: timestamp_millis(),
             });
-            self.execution_to_csv("/data/csv_data")?;
+            // self.execution_to_csv("/data/csv_data")?;
+            self.execution_to_csv(
+                "/home/zsl/datafusion-ballista/benchmarks/clickbench_data/csv_data",
+            )?;
         } else if has_resolved {
             events.push(QueryStageSchedulerEvent::JobUpdated(job_id))
         }

@@ -574,8 +574,13 @@ pub(crate) async fn bind_task_gen_policy(
             for (partition_id, task_info) in runnable_tasks {
                 // 让 task_id 每次执行固定
                 let task_id = running_stage.stage_id * 1000 + partition_id as usize;
-                let executor_idx = task_assignments.get(&task_id).unwrap();
-                let executor_id = available_executors[*executor_idx].clone();
+
+                let executor_idx = task_assignments.get(&task_id);
+                if executor_idx.is_none() {
+                    warn!("Task id {} not found in task_assignments", task_id);
+                }
+                let executor_id =
+                    available_executors[*executor_idx.unwrap_or(&0)].clone();
 
                 *task_id_gen += 1;
                 *task_info = Some(create_task_info(executor_id.clone(), task_id));

@@ -29,7 +29,7 @@ FILE=./data/supplier.tbl
 if test -f "$FILE"; then
     echo "$FILE exists."
 else
-  docker run -v `pwd`/data:/data -it --rm ghcr.io/scalytics/tpch-docker:main -vf -s 10
+  docker run -v `pwd`/data:/data -it --rm ghcr.io/scalytics/tpch-docker:main -vf -s 100
 fi
 
 # Copy expected answers into the ./data/answers directory if it does not already exist

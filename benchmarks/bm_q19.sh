@@ -167,6 +167,6 @@ do
         echo "$policy_id skipped, because docker ps -q is not 3"
     else
         benchmark_name="benchmark_tpchq19_$policy_id"
-        docker run --name $benchmark_name --network=host -v /home/zsl/datafusion-ballista/benchmarks/data:/data apache/arrow-ballista-benchmarks-q19:latest --benchmark-name $benchmark_name
+        docker run --name $benchmark_name --network=host -v /home/zsl/datafusion-ballista/benchmarks/data:/data apache/arrow-ballista-benchmarks-query:latest --benchmark-name $benchmark_name --query 7
     fi
 done
