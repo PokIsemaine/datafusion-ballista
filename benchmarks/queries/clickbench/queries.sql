@@ -1,4 +1,4 @@
-SELECT AVG(sub."UserID") AS median_user_id FROM (SELECT "UserID", ROW_NUMBER() OVER (ORDER BY "UserID") AS rn, COUNT(*) OVER () AS total_count FROM hits WHERE "UserID" IS NOT NULL) sub WHERE rn IN (FLOOR((total_count + 1) / 2), CEIL((total_count + 1) / 2));
+SELECT COUNT(*) FROM hits;
 SELECT COUNT(*) FROM hits WHERE "AdvEngineID" <> 0;
 SELECT SUM("AdvEngineID"), COUNT(*), AVG("ResolutionWidth") FROM hits;
 SELECT AVG("UserID") FROM hits;
