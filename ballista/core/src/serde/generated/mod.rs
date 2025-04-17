@@ -26,3 +26,15 @@ pub mod ballista;
 pub mod ballista {
     include!(concat!(env!("OUT_DIR"), "/ballista.rs"));
 }
+
+// include the brain_server protobuf source as a submodule
+#[allow(clippy::all)]
+#[rustfmt::skip]
+#[cfg(not(docsrs))]
+pub mod brain_server;
+
+#[cfg(docsrs)]
+#[allow(clippy::all)]
+pub mod brain_server {
+    include!(concat!(env!("OUT_DIR"), "/brain_server.rs"));
+}

@@ -57,5 +57,23 @@ fn main() -> Result<(), String> {
         file.write_all(code.as_str().as_ref()).unwrap();
     }
 
+    let brain_server_path = "src/serde/generated/brain_server.rs";
+    if Path::new("proto/brain_server.proto").exists() {
+        println!("cargo:rerun-if-changed=proto/brain_server.proto");
+        tonic_build::configure()
+            .build_server(false)
+            .compile_protos(&["proto/brain_server.proto"], &["proto"])
+            .map_err(|e| format!("protobuf compilation failed: {e}"))?;
+        let generated_source_path = out.join("brain_server.protobuf.rs");
+        let code = std::fs::read_to_string(generated_source_path).unwrap();
+        let mut file = std::fs::OpenOptions::new()
+            .write(true)
+            .truncate(true)
+            .create(true)
+            .open(brain_server_path)
+            .unwrap();
+        file.write_all(code.as_str().as_ref()).unwrap();
+    }
+
     Ok(())
 }

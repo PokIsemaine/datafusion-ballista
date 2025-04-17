@@ -53,6 +53,7 @@ use crate::execution_plans::{
 use crate::serde::protobuf::ballista_physical_plan_node::PhysicalPlanType;
 use crate::serde::scheduler::PartitionLocation;
 pub use generated::ballista as protobuf;
+pub use generated::brain_server as brain_server_pb;
 
 pub mod generated;
 pub mod scheduler;

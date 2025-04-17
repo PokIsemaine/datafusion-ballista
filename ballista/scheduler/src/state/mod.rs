@@ -48,6 +48,7 @@ use log::{debug, error, info, warn};
 use prost::Message;
 use std::path::Path;
 
+pub mod brain_server_manager;
 pub mod execution_graph;
 pub mod execution_graph_dot;
 pub mod executor_manager;
