@@ -22,7 +22,6 @@ use std::time::SystemTime;
 
 use ballista::prelude::SessionContextExt;
 use ballista_benchmarks::util::CommonOpt;
-use datafusion::arrow::array::RecordBatch;
 use datafusion::arrow::util::pretty::print_batches;
 use datafusion::common::exec_datafusion_err;
 use datafusion::execution::SessionStateBuilder;

@@ -19,7 +19,7 @@ use std::sync::Arc;
 use std::vec;
 
 use ballista_core::error::{BallistaError, Result};
-use ballista_core::serde::brain_server_pb::{ScheduleJob, ScheduleStage, ScheduleTask};
+use ballista_core::serde::brain_server_pb::{ScheduleJob, ScheduleStage};
 use ballista_core::utils::create_grpc_client_connection;
 use dashmap::DashMap;
 use datafusion::physical_plan::ExecutionPlan;
@@ -96,26 +96,14 @@ impl BrainServerManager {
             BallistaError::General(format!("Failed to get brain server client: {}", e))
         })?;
 
-        let plan_json = physical_plan_to_json(plan).map_err(|e| {
-            BallistaError::General(format!("Failed to convert plan to JSON: {}", e))
-        })?;
+        // let plan_json = physical_plan_to_json(plan).map_err(|e| {
+        //     BallistaError::General(format!("Failed to convert plan to JSON: {}", e))
+        // })?;
 
-        let tasks = ScheduleTask {};
-        let stage = ScheduleStage {
-            stage_id: "123".to_string(),
-            physical_plan: plan_json,
-            tasks: vec![tasks],
-        };
-
-        let schedule_job = ScheduleJob {
-            job_id: "123".to_string(),
-            job_name: "job_name".to_string(),
-            stages: vec![stage],
-        };
-        let response = client.recommend_schedule(schedule_job).await.map_err(|e| {
-            BallistaError::General(format!("Failed to send schedule job: {}", e))
-        })?;
-        info!("Received response from brain server: {:?}", response);
+        // let response = client.recommend_schedule(schedule_job).await.map_err(|e| {
+        //     BallistaError::General(format!("Failed to send schedule job: {}", e))
+        // })?;
+        // info!("Received response from brain server: {:?}", response);
 
         Ok(())
     }

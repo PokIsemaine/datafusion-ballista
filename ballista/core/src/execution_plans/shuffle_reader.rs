@@ -40,9 +40,7 @@ use datafusion::common::runtime::SpawnedTask;
 use datafusion::error::Result;
 use datafusion::physical_plan::metrics::{ExecutionPlanMetricsSet, MetricsSet};
 use datafusion::physical_plan::{
-    ColumnStatistics, DisplayAs, DisplayFormatType, ExecutionPlan, ExplainCsvRow,
-    Partitioning, PlanProperties, RecordBatchStream, SendableRecordBatchStream,
-    Statistics,
+    ColumnStatistics, CsvVisitorResult, DisplayAs, DisplayFormatType, ExecutionPlan, ExplainCsvRow, Partitioning, PlanProperties, RecordBatchStream, SendableRecordBatchStream, Statistics
 };
 use futures::{Stream, StreamExt, TryStreamExt};
 
@@ -107,7 +105,7 @@ impl DisplayAs for ShuffleReaderExec {
         }
     }
 
-    fn csv_as(&self, explain_csv_row: &mut ExplainCsvRow) -> std::fmt::Result {
+    fn csv_as(&self, explain_csv_row: &mut ExplainCsvRow) -> CsvVisitorResult {
         explain_csv_row.operator_type = "ShuffleReaderExec".to_string();
         explain_csv_row.shuffle_reader_partitions = self.partition.len();
         Ok(())

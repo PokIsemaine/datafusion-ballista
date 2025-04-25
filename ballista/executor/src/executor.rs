@@ -226,8 +226,7 @@ mod test {
     use datafusion::execution::context::TaskContext;
 
     use datafusion::physical_plan::{
-        DisplayAs, DisplayFormatType, ExecutionPlan, Partitioning, PlanProperties,
-        RecordBatchStream, SendableRecordBatchStream, Statistics,
+        CsvVisitorResult, DisplayAs, DisplayFormatType, ExecutionPlan, Partitioning, PlanProperties, RecordBatchStream, SendableRecordBatchStream, Statistics
     };
     use datafusion::prelude::SessionContext;
     use futures::Stream;
@@ -290,6 +289,12 @@ mod test {
                     write!(f, "NeverendingOperator")
                 }
             }
+        }
+        fn csv_as(
+            &self,
+            _explain_csv_row: &mut datafusion::physical_plan::ExplainCsvRow,
+        ) -> CsvVisitorResult {
+            unimplemented!()
         }
     }
 

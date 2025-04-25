@@ -51,8 +51,7 @@ use datafusion::physical_plan::metrics::{
 };
 
 use datafusion::physical_plan::{
-    displayable, DisplayAs, DisplayFormatType, ExecutionPlan, ExplainCsvRow,
-    Partitioning, PlanProperties, SendableRecordBatchStream, Statistics,
+    displayable, CsvVisitorResult, DisplayAs, DisplayFormatType, ExecutionPlan, ExplainCsvRow, Partitioning, PlanProperties, SendableRecordBatchStream, Statistics
 };
 use futures::{StreamExt, TryFutureExt, TryStreamExt};
 
@@ -365,7 +364,7 @@ impl DisplayAs for ShuffleWriterExec {
             }
         }
     }
-    fn csv_as(&self, explain_csv_row: &mut ExplainCsvRow) -> std::fmt::Result {
+    fn csv_as(&self, explain_csv_row: &mut ExplainCsvRow) -> CsvVisitorResult {
         explain_csv_row.operator_type = "ShuffleWriterExec".to_string();
         explain_csv_row.shuffle_writer_output_partitioning =
             format!("{:?}", self.shuffle_output_partitioning);

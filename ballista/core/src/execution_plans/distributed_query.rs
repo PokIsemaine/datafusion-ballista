@@ -32,8 +32,7 @@ use datafusion::logical_expr::LogicalPlan;
 use datafusion::physical_expr::EquivalenceProperties;
 use datafusion::physical_plan::stream::RecordBatchStreamAdapter;
 use datafusion::physical_plan::{
-    DisplayAs, DisplayFormatType, ExecutionPlan, ExplainCsvRow, Partitioning,
-    PlanProperties, SendableRecordBatchStream, Statistics,
+    CsvVisitorResult, DisplayAs, DisplayFormatType, ExecutionPlan, ExplainCsvRow, Partitioning, PlanProperties, SendableRecordBatchStream, Statistics
 };
 use datafusion_proto::logical_plan::{
     AsLogicalPlan, DefaultLogicalExtensionCodec, LogicalExtensionCodec,
@@ -131,7 +130,7 @@ impl<T: 'static + AsLogicalPlan> DisplayAs for DistributedQueryExec<T> {
             }
         }
     }
-    fn csv_as(&self, explain_csv_row: &mut ExplainCsvRow) -> std::fmt::Result {
+    fn csv_as(&self, explain_csv_row: &mut ExplainCsvRow) -> CsvVisitorResult {
         explain_csv_row.operator_type = "DistributedQueryExec".to_string();
         Ok(())
     }
