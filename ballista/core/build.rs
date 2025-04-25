@@ -62,6 +62,9 @@ fn main() -> Result<(), String> {
         println!("cargo:rerun-if-changed=proto/brain_server.proto");
         tonic_build::configure()
             .build_server(false)
+            .extern_path(".datafusion_common", "::datafusion_proto_common")
+            .extern_path(".datafusion", "::datafusion_proto::protobuf")
+            .protoc_arg("--experimental_allow_proto3_optional")
             .compile_protos(&["proto/brain_server.proto"], &["proto"])
             .map_err(|e| format!("protobuf compilation failed: {e}"))?;
         let generated_source_path = out.join("brain_server.protobuf.rs");

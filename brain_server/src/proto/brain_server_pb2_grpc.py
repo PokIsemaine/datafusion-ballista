@@ -40,6 +40,11 @@ class BrainServerStub(object):
                 request_serializer=proto_dot_brain__server__pb2.HelloRequest.SerializeToString,
                 response_deserializer=proto_dot_brain__server__pb2.HelloReply.FromString,
                 _registered_method=True)
+        self.RecommendSchedule = channel.unary_unary(
+                '/brain_server.protobuf.BrainServer/RecommendSchedule',
+                request_serializer=proto_dot_brain__server__pb2.ScheduleJob.SerializeToString,
+                response_deserializer=proto_dot_brain__server__pb2.ScheduleResult.FromString,
+                _registered_method=True)
 
 
 class BrainServerServicer(object):
@@ -53,6 +58,12 @@ class BrainServerServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def RecommendSchedule(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_BrainServerServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -60,6 +71,11 @@ def add_BrainServerServicer_to_server(servicer, server):
                     servicer.SayHello,
                     request_deserializer=proto_dot_brain__server__pb2.HelloRequest.FromString,
                     response_serializer=proto_dot_brain__server__pb2.HelloReply.SerializeToString,
+            ),
+            'RecommendSchedule': grpc.unary_unary_rpc_method_handler(
+                    servicer.RecommendSchedule,
+                    request_deserializer=proto_dot_brain__server__pb2.ScheduleJob.FromString,
+                    response_serializer=proto_dot_brain__server__pb2.ScheduleResult.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -90,6 +106,33 @@ class BrainServer(object):
             '/brain_server.protobuf.BrainServer/SayHello',
             proto_dot_brain__server__pb2.HelloRequest.SerializeToString,
             proto_dot_brain__server__pb2.HelloReply.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RecommendSchedule(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/brain_server.protobuf.BrainServer/RecommendSchedule',
+            proto_dot_brain__server__pb2.ScheduleJob.SerializeToString,
+            proto_dot_brain__server__pb2.ScheduleResult.FromString,
             options,
             channel_credentials,
             insecure,

@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18proto/brain_server.proto\x12\x15\x62rain_server.protobuf\"\x1c\n\x0cHelloRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x1d\n\nHelloReply\x12\x0f\n\x07message\x18\x01 \x01(\t2a\n\x0b\x42rainServer\x12R\n\x08SayHello\x12#.brain_server.protobuf.HelloRequest\x1a!.brain_server.protobuf.HelloReplyb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x18proto/brain_server.proto\x12\x15\x62rain_server.protobuf\"\x1c\n\x0cHelloRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x1d\n\nHelloReply\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x0e\n\x0cScheduleTask\"l\n\rScheduleStage\x12\x10\n\x08stage_id\x18\x01 \x01(\t\x12\x32\n\x05tasks\x18\x02 \x03(\x0b\x32#.brain_server.protobuf.ScheduleTask\x12\x15\n\rphysical_plan\x18\x03 \x01(\t\"e\n\x0bScheduleJob\x12\x0e\n\x06job_id\x18\x01 \x01(\t\x12\x10\n\x08job_name\x18\x02 \x01(\t\x12\x34\n\x06stages\x18\x03 \x03(\x0b\x32$.brain_server.protobuf.ScheduleStage\" \n\x0eScheduleResult\x12\x0e\n\x06status\x18\x01 \x01(\t2\xc1\x01\n\x0b\x42rainServer\x12R\n\x08SayHello\x12#.brain_server.protobuf.HelloRequest\x1a!.brain_server.protobuf.HelloReply\x12^\n\x11RecommendSchedule\x12\".brain_server.protobuf.ScheduleJob\x1a%.brain_server.protobuf.ScheduleResultb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -35,6 +35,14 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_HELLOREQUEST']._serialized_end=79
   _globals['_HELLOREPLY']._serialized_start=81
   _globals['_HELLOREPLY']._serialized_end=110
-  _globals['_BRAINSERVER']._serialized_start=112
-  _globals['_BRAINSERVER']._serialized_end=209
+  _globals['_SCHEDULETASK']._serialized_start=112
+  _globals['_SCHEDULETASK']._serialized_end=126
+  _globals['_SCHEDULESTAGE']._serialized_start=128
+  _globals['_SCHEDULESTAGE']._serialized_end=236
+  _globals['_SCHEDULEJOB']._serialized_start=238
+  _globals['_SCHEDULEJOB']._serialized_end=339
+  _globals['_SCHEDULERESULT']._serialized_start=341
+  _globals['_SCHEDULERESULT']._serialized_end=373
+  _globals['_BRAINSERVER']._serialized_start=376
+  _globals['_BRAINSERVER']._serialized_end=569
 # @@protoc_insertion_point(module_scope)

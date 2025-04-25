@@ -18,12 +18,11 @@ dependencies = [
     "duckdb (>=1.2.2,<2.0.0)",
     "psutil (>=7.0.0,<8.0.0)",
     "grpcio (>=1.71.0,<2.0.0)",
-    "grpcio-tools (>=1.71.0,<2.0.0)"
+    "grpcio-tools (>=1.71.0,<2.0.0)",
 ]
 
 [tool.poetry]
-packages = [{include = "resource_manager", from = "src"}]
-
+packages = [{include = "brain_server", from = "src"}]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

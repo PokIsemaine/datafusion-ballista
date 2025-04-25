@@ -12,8 +12,30 @@ message HelloReply {
   string message = 1;
 }
 
+message ScheduleTask {}
+
+
+message ScheduleStage {
+  string stage_id = 1;
+  repeated ScheduleTask tasks = 2;
+  // json string
+  string physical_plan = 3;
+}
+
+message ScheduleJob {
+  string job_id = 1;
+  string job_name = 2;
+  repeated ScheduleStage stages = 3;
+}
+
+message ScheduleResult {
+  string status = 1;
+}
+
 // 定义服务
 service BrainServer {
   // SayHello RPC
   rpc SayHello (HelloRequest) returns (HelloReply);
+
+  rpc RecommendSchedule (ScheduleJob) returns (ScheduleResult);
 }
