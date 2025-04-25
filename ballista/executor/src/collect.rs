@@ -65,6 +65,13 @@ impl DisplayAs for CollectExec {
             }
         }
     }
+    fn csv_as(
+        &self,
+        explain_csv_row: &mut datafusion::physical_plan::ExplainCsvRow,
+    ) -> std::fmt::Result {
+        explain_csv_row.operator_type = "CollectExec".to_string();
+        Ok(())
+    }
 }
 
 impl ExecutionPlan for CollectExec {

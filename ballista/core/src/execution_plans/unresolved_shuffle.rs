@@ -22,8 +22,8 @@ use datafusion::arrow::datatypes::SchemaRef;
 use datafusion::error::{DataFusionError, Result};
 use datafusion::execution::context::TaskContext;
 use datafusion::physical_plan::{
-    DisplayAs, DisplayFormatType, ExecutionPlan, Partitioning, PlanProperties,
-    SendableRecordBatchStream, Statistics,
+    DisplayAs, DisplayFormatType, ExecutionPlan, ExplainCsvRow, Partitioning,
+    PlanProperties, SendableRecordBatchStream, Statistics,
 };
 
 /// UnresolvedShuffleExec represents a dependency on the results of a ShuffleWriterExec node which hasn't computed yet.
@@ -77,6 +77,12 @@ impl DisplayAs for UnresolvedShuffleExec {
                 )
             }
         }
+    }
+    fn csv_as(&self, explain_csv_row: &mut ExplainCsvRow) -> std::fmt::Result {
+        explain_csv_row.operator_type = "UnresolvedShuffleExec".to_string();
+        explain_csv_row.unresolved_shuffle_output_partitioning =
+            format!("{:?}", self.properties().output_partitioning());
+        Ok(())
     }
 }
 

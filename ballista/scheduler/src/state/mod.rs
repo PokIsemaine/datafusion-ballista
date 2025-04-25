@@ -15,6 +15,7 @@
 // specific language governing permissions and limitations
 // under the License.
 
+use brain_server_manager::BrainServerManager;
 use datafusion::common::tree_node::{Transformed, TreeNode, TreeNodeRecursion};
 use datafusion::datasource::listing::{ListingTable, ListingTableUrl};
 use datafusion::datasource::source_as_provider;
@@ -96,6 +97,7 @@ pub struct SchedulerState<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPl
     pub session_manager: SessionManager,
     pub codec: BallistaCodec<T, U>,
     pub config: Arc<SchedulerConfig>,
+    pub brain_server_manager: BrainServerManager,
 }
 
 impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerState<T, U> {
@@ -118,6 +120,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerState<T,
             session_manager: SessionManager::new(cluster.job_state()),
             codec,
             config,
+            brain_server_manager: BrainServerManager::new("localhost:60061".to_owned()),
         }
     }
 
@@ -152,6 +155,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerState<T,
             session_manager: SessionManager::new(cluster.job_state()),
             codec,
             config,
+            brain_server_manager: BrainServerManager::new("localhost:60061".to_owned()),
         }
     }
 
@@ -529,6 +533,9 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerState<T,
             "Physical plan: {}",
             DisplayableExecutionPlan::new(plan.as_ref()).indent(false)
         );
+        self.brain_server_manager
+            .recommend_schedule(plan.clone())
+            .await?;
 
         let plan = plan.transform_down(&|node: Arc<dyn ExecutionPlan>| {
             if node.output_partitioning().partition_count() == 0 {

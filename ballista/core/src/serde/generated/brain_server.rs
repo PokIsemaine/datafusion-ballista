@@ -11,6 +11,32 @@ pub struct HelloReply {
     #[prost(string, tag = "1")]
     pub message: ::prost::alloc::string::String,
 }
+#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+pub struct ScheduleTask {}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ScheduleStage {
+    #[prost(string, tag = "1")]
+    pub stage_id: ::prost::alloc::string::String,
+    #[prost(message, repeated, tag = "2")]
+    pub tasks: ::prost::alloc::vec::Vec<ScheduleTask>,
+    /// json string
+    #[prost(string, tag = "3")]
+    pub physical_plan: ::prost::alloc::string::String,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ScheduleJob {
+    #[prost(string, tag = "1")]
+    pub job_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub job_name: ::prost::alloc::string::String,
+    #[prost(message, repeated, tag = "3")]
+    pub stages: ::prost::alloc::vec::Vec<ScheduleStage>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ScheduleResult {
+    #[prost(string, tag = "1")]
+    pub status: ::prost::alloc::string::String,
+}
 /// Generated client implementations.
 pub mod brain_server_client {
     #![allow(
@@ -124,6 +150,32 @@ pub mod brain_server_client {
             req.extensions_mut()
                 .insert(
                     GrpcMethod::new("brain_server.protobuf.BrainServer", "SayHello"),
+                );
+            self.inner.unary(req, path, codec).await
+        }
+        pub async fn recommend_schedule(
+            &mut self,
+            request: impl tonic::IntoRequest<super::ScheduleJob>,
+        ) -> std::result::Result<tonic::Response<super::ScheduleResult>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::unknown(
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/brain_server.protobuf.BrainServer/RecommendSchedule",
+            );
+            let mut req = request.into_request();
+            req.extensions_mut()
+                .insert(
+                    GrpcMethod::new(
+                        "brain_server.protobuf.BrainServer",
+                        "RecommendSchedule",
+                    ),
                 );
             self.inner.unary(req, path, codec).await
         }

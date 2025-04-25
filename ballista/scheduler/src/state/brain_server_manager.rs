@@ -15,18 +15,18 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use std::collections::HashMap;
 use std::sync::Arc;
+use std::vec;
 
 use ballista_core::error::{BallistaError, Result};
+use ballista_core::serde::brain_server_pb::{ScheduleJob, ScheduleStage, ScheduleTask};
 use ballista_core::utils::create_grpc_client_connection;
 use dashmap::DashMap;
-use log::{debug, info, warn};
+use datafusion::physical_plan::ExecutionPlan;
+use datafusion_proto::bytes::physical_plan_to_json;
+use log::{debug, info};
 use tonic::transport::Channel;
 
-use crate::cluster::BoundTask;
-use crate::config::SchedulerConfig;
-use crate::state::task_manager::JobInfoCache;
 use ballista_core::serde::brain_server_pb::brain_server_client::BrainServerClient;
 
 /// Client manager for brain server
@@ -36,8 +36,6 @@ type BrainServerClients = Arc<DashMap<String, BrainServerClient<Channel>>>;
 /// which provides advanced scheduling policies and resource management capabilities
 #[derive(Clone)]
 pub struct BrainServerManager {
-    /// Configuration for the scheduler
-    config: Arc<SchedulerConfig>,
     /// Client connection to the brain server
     clients: BrainServerClients,
     /// Brain server address
@@ -46,9 +44,8 @@ pub struct BrainServerManager {
 
 impl BrainServerManager {
     /// Create a new BrainServerManager instance
-    pub fn new(config: Arc<SchedulerConfig>, brain_server_addr: String) -> Self {
+    pub fn new(brain_server_addr: String) -> Self {
         Self {
-            config: config.clone(),
             clients: Default::default(),
             brain_server_addr,
         }
@@ -91,29 +88,36 @@ impl BrainServerManager {
         Ok(())
     }
 
-    /// Get scheduling recommendation from brain server
-    pub async fn get_scheduling_policy(
-        &self,
-        jobs: Arc<HashMap<String, JobInfoCache>>,
-    ) -> Result<Vec<BoundTask>> {
-        if self.clients.is_empty() {
-            warn!("Brain server client is not initialized, falling back to default scheduling policy");
-            return Ok(vec![]);
-        }
-
-        // Here we would send job information to brain server and get scheduling recommendations
+    pub async fn recommend_schedule(&self, plan: Arc<dyn ExecutionPlan>) -> Result<()> {
+        // Here we would send a scheduling job request to the brain server
         // This is a placeholder for the actual implementation
-        info!(
-            "Requesting scheduling policy from brain server for {} jobs",
-            jobs.len()
-        );
+        info!("Sending scheduling job request to brain server");
+        let mut client = self.get_client("default_executor_id").await.map_err(|e| {
+            BallistaError::General(format!("Failed to get brain server client: {}", e))
+        })?;
 
-        // In a real implementation, we would:
-        // 1. Convert job information to protobuf message
-        // 2. Send request to brain server
-        // 3. Convert response to BoundTask structures
+        let plan_json = physical_plan_to_json(plan).map_err(|e| {
+            BallistaError::General(format!("Failed to convert plan to JSON: {}", e))
+        })?;
 
-        Ok(vec![])
+        let tasks = ScheduleTask {};
+        let stage = ScheduleStage {
+            stage_id: "123".to_string(),
+            physical_plan: plan_json,
+            tasks: vec![tasks],
+        };
+
+        let schedule_job = ScheduleJob {
+            job_id: "123".to_string(),
+            job_name: "job_name".to_string(),
+            stages: vec![stage],
+        };
+        let response = client.recommend_schedule(schedule_job).await.map_err(|e| {
+            BallistaError::General(format!("Failed to send schedule job: {}", e))
+        })?;
+        info!("Received response from brain server: {:?}", response);
+
+        Ok(())
     }
 }
 

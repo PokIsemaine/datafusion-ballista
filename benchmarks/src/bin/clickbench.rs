@@ -23,6 +23,7 @@ use std::time::SystemTime;
 use ballista::prelude::SessionContextExt;
 use ballista_benchmarks::util::CommonOpt;
 use datafusion::arrow::array::RecordBatch;
+use datafusion::arrow::util::pretty::print_batches;
 use datafusion::common::exec_datafusion_err;
 use datafusion::execution::SessionStateBuilder;
 use datafusion::prelude::ParquetReadOptions;
@@ -211,14 +212,15 @@ impl RunOpt {
         let iterations = self.common.iterations;
         for query_id in query_range {
             let mut millis = Vec::with_capacity(iterations);
-            let mut benchmark_run = BenchmarkRun::new(query_id, "clickbench".to_string());
+            let _ = BenchmarkRun::new(query_id, "clickbench".to_string());
             let sql = queries.get_query(query_id)?;
             println!("Q{query_id}: {sql}");
 
-            let mut result: Vec<RecordBatch> = Vec::with_capacity(1);
+            // let mut result: Vec<RecordBatch> = Vec::with_capacity(1);
             for i in 0..iterations {
                 let start = Instant::now();
                 let result = ctx.sql(sql).await?.collect().await?;
+                print_batches(&result)?;
                 let elapsed = start.elapsed();
                 let ms = elapsed.as_secs_f64() * 1000.0;
                 millis.push(ms);
@@ -227,9 +229,7 @@ impl RunOpt {
                     "Query {query_id} iteration {i} took {ms:.1} ms and returned {row_count} rows"
                 );
             }
-            if self.common.debug {
-                ctx.sql(sql).await?.explain(false, false)?.show().await?;
-            }
+            ctx.sql(sql).await?.explain(true, false)?.show().await?;
             let avg = millis.iter().sum::<f64>() / millis.len() as f64;
             println!("Query {query_id} avg time: {avg:.2} ms");
         }

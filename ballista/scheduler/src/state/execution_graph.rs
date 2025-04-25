@@ -42,7 +42,7 @@ use ballista_core::serde::scheduler::{
     ExecutorMetadata, PartitionId, PartitionLocation, PartitionStats,
 };
 
-use crate::display::print_stage_metrics;
+use crate::display::{print_stage_metrics, print_stage_metrics_csv};
 use crate::planner::DistributedPlanner;
 use crate::scheduler_server::event::QueryStageSchedulerEvent;
 use crate::scheduler_server::timestamp_millis;
@@ -471,6 +471,13 @@ impl ExecutionGraph {
                         if let Some(stage_metrics) = running_stage.stage_metrics.as_ref()
                         {
                             print_stage_metrics(
+                                &job_id,
+                                stage_id,
+                                running_stage.plan.as_ref(),
+                                stage_metrics,
+                            );
+
+                            print_stage_metrics_csv(
                                 &job_id,
                                 stage_id,
                                 running_stage.plan.as_ref(),

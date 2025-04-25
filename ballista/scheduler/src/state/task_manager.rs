@@ -15,7 +15,6 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use crate::config::SchedulerConfig;
 use crate::scheduler_server::event::QueryStageSchedulerEvent;
 
 use crate::state::execution_graph::{
@@ -37,7 +36,7 @@ use ballista_core::serde::scheduler::ExecutorMetadata;
 use ballista_core::serde::BallistaCodec;
 use dashmap::DashMap;
 
-use datafusion::physical_plan::ExecutionPlan;
+use datafusion::physical_plan::{displayable, ExecutionPlan};
 use datafusion_proto::logical_plan::AsLogicalPlan;
 use datafusion_proto::physical_plan::AsExecutionPlan;
 use log::{debug, error, info, trace, warn};
@@ -48,8 +47,6 @@ use std::sync::Arc;
 use std::time::Duration;
 use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::sync::RwLock;
-
-use super::brain_server_manager::BrainServerManager;
 
 type ActiveJobCache = Arc<DashMap<String, JobInfoCache>>;
 
@@ -119,7 +116,6 @@ pub struct TaskManager<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan>
     // Cache for active jobs curated by this scheduler
     active_job_cache: ActiveJobCache,
     launcher: Arc<dyn TaskLauncher>,
-    brain_server_manager: BrainServerManager,
 }
 
 #[derive(Clone)]
@@ -164,10 +160,6 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> TaskManager<T, U>
             scheduler_id: scheduler_id.clone(),
             active_job_cache: Arc::new(DashMap::new()),
             launcher: Arc::new(DefaultTaskLauncher::new(scheduler_id)),
-            brain_server_manager: BrainServerManager::new(
-                Arc::new(SchedulerConfig::default()),
-                "localhost:60061".to_string(),
-            ),
         }
     }
 
@@ -184,10 +176,6 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> TaskManager<T, U>
             scheduler_id,
             active_job_cache: Arc::new(DashMap::new()),
             launcher,
-            brain_server_manager: BrainServerManager::new(
-                Arc::new(SchedulerConfig::default()),
-                String::new(),
-            ),
         }
     }
 
@@ -229,7 +217,20 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> TaskManager<T, U>
             session_config,
         )?;
         info!("Submitting execution graph: {:?}", graph);
-        self.brain_server_manager.say_hello().await?;
+
+        let plans = graph
+            .stages()
+            .iter()
+            .map(|(stage_id, stage)| {
+                let plan = stage.plan();
+                Ok((*stage_id, plan))
+            })
+            .collect::<Result<HashMap<_, _>>>()?;
+
+        for (stage_id, plan) in plans {
+            let _ = displayable(plan).csv(stage_id).to_string();
+        }
+
         self.state.submit_job(job_id.to_string(), &graph).await?;
 
         graph.revive();
