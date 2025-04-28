@@ -24,7 +24,8 @@ use datafusion::common::stats::Precision;
 use datafusion::logical_expr::{StringifiedPlan, ToStringifiedPlan};
 use datafusion::physical_plan::metrics::MetricsSet;
 use datafusion::physical_plan::{
-    accept, csv_accept, CsvExecutionPlanVisitor, CsvMetricsRow, CsvVisitorResult, DisplayFormatType, ExecutionPlan, ExecutionPlanVisitor, ExplainCsvRow
+    accept, csv_accept, CsvExecutionPlanVisitor, CsvMetricsRow, CsvVisitorResult,
+    DisplayFormatType, ExecutionPlan, ExecutionPlanVisitor, ExplainCsvRow,
 };
 use log::{error, info};
 use std::fmt;
@@ -81,8 +82,12 @@ pub fn print_stage_metrics_csv(
             },
         );
         let mut result = Vec::new();
-        DisplayableBallistaExecutionPlan::new(plan, &plan_metrics)
-            .csv(job_id.to_string(), "default_jobname".to_string(), stage_id, &mut result);
+        let _ = DisplayableBallistaExecutionPlan::new(plan, &plan_metrics).csv(
+            job_id.to_string(),
+            "default_jobname".to_string(),
+            stage_id,
+            &mut result,
+        );
     } else {
         error!("Fail to combine stage metrics to plan for stage [{}/{}],  plan metrics array size {} does not equal
                 to the stage metrics array size {}", job_id, stage_id, plan_metrics.len(), stage_metrics.len());

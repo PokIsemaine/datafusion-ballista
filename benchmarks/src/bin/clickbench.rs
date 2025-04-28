@@ -228,7 +228,7 @@ impl RunOpt {
                     "Query {query_id} iteration {i} took {ms:.1} ms and returned {row_count} rows"
                 );
             }
-            ctx.sql(sql).await?.explain(true, false)?.show().await?;
+            // ctx.sql(sql).await?.explain(true, false)?.show().await?;
             let avg = millis.iter().sum::<f64>() / millis.len() as f64;
             println!("Query {query_id} avg time: {avg:.2} ms");
         }

@@ -238,6 +238,15 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> TaskManager<T, U>
 
         self.state.submit_job(job_id.to_string(), &graph).await?;
 
+        let stage_graph = graph
+        .stages()
+        .iter()
+        .map(|(stage_id, stage)| {
+            let output_links = stage.output_links();
+            Ok((*stage_id, output_links))
+        })
+        .collect::<Result<HashMap<_, _>>>()?;
+
         let mut schedule_stages = vec![];
         for (stage_id, plan) in plans {
             let mut stage_plan: Vec<ExplainCsvRow> = vec![];
@@ -245,10 +254,16 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> TaskManager<T, U>
                 job_id.to_string(),
                 job_name.to_string(),
                 stage_id,
+                stage_graph[&stage_id].clone(),
                 &mut stage_plan,
             );
             schedule_stages.push(stage_plan);
         }
+
+        let _ = self
+            .brain_server_manager
+            .recommend_schedule(job_id, job_name, &schedule_stages)
+            .await?;
 
         graph.revive();
         self.active_job_cache

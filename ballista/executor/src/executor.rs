@@ -226,7 +226,8 @@ mod test {
     use datafusion::execution::context::TaskContext;
 
     use datafusion::physical_plan::{
-        CsvVisitorResult, DisplayAs, DisplayFormatType, ExecutionPlan, Partitioning, PlanProperties, RecordBatchStream, SendableRecordBatchStream, Statistics
+        CsvVisitorResult, DisplayAs, DisplayFormatType, ExecutionPlan, Partitioning,
+        PlanProperties, RecordBatchStream, SendableRecordBatchStream, Statistics,
     };
     use datafusion::prelude::SessionContext;
     use futures::Stream;

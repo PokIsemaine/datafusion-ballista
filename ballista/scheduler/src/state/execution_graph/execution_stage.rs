@@ -93,6 +93,16 @@ impl ExecutionStage {
             ExecutionStage::Failed(stage) => stage.plan.as_ref(),
         }
     }
+
+    pub (crate) fn output_links(&self) -> &Vec<usize> {
+        match self {
+            ExecutionStage::UnResolved(stage) => &stage.output_links,
+            ExecutionStage::Resolved(stage) => &stage.output_links,
+            ExecutionStage::Running(stage) => &stage.output_links,
+            ExecutionStage::Successful(stage) => &stage.output_links,
+            ExecutionStage::Failed(stage) => &stage.output_links,
+        }
+    }
 }
 
 /// For a stage whose input stages are not all completed, we say it's a unresolved stage

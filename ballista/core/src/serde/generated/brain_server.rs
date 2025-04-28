@@ -12,17 +12,17 @@ pub struct HelloReply {
     pub message: ::prost::alloc::string::String,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
-pub struct ScheduleStage {
+pub struct StageOperator {
     #[prost(string, tag = "1")]
     pub job_id: ::prost::alloc::string::String,
     #[prost(string, tag = "2")]
     pub job_name: ::prost::alloc::string::String,
-    #[prost(uint32, tag = "3")]
-    pub stage_id: u32,
-    #[prost(uint32, tag = "4")]
-    pub current_op_id: u32,
-    #[prost(uint32, tag = "5")]
-    pub parent_op_id: u32,
+    #[prost(uint64, tag = "3")]
+    pub stage_id: u64,
+    #[prost(uint64, tag = "4")]
+    pub current_op_id: u64,
+    #[prost(uint64, tag = "5")]
+    pub parent_op_id: u64,
     #[prost(string, tag = "6")]
     pub operator_type: ::prost::alloc::string::String,
     #[prost(string, tag = "7")]
@@ -31,8 +31,8 @@ pub struct ScheduleStage {
     pub stat_total_byte_size: ::prost::alloc::string::String,
     #[prost(string, tag = "9")]
     pub column_stats: ::prost::alloc::string::String,
-    #[prost(uint32, optional, tag = "10")]
-    pub topk_fetch: ::core::option::Option<u32>,
+    #[prost(uint64, optional, tag = "10")]
+    pub topk_fetch: ::core::option::Option<u64>,
     #[prost(string, tag = "11")]
     pub sort_expr: ::prost::alloc::string::String,
     #[prost(bool, tag = "12")]
@@ -43,14 +43,14 @@ pub struct ScheduleStage {
     pub agg_gby: ::prost::alloc::string::String,
     #[prost(string, tag = "15")]
     pub agg_aggr: ::prost::alloc::string::String,
-    #[prost(uint32, optional, tag = "16")]
-    pub agg_limit: ::core::option::Option<u32>,
+    #[prost(uint64, optional, tag = "16")]
+    pub agg_limit: ::core::option::Option<u64>,
     #[prost(string, tag = "17")]
     pub agg_input_order_mode: ::prost::alloc::string::String,
-    #[prost(uint32, tag = "18")]
-    pub coalesce_batch_target_batch_size: u32,
-    #[prost(uint32, optional, tag = "19")]
-    pub coalesce_batch_fetch: ::core::option::Option<u32>,
+    #[prost(uint64, tag = "18")]
+    pub coalesce_batch_target_batch_size: u64,
+    #[prost(uint64, optional, tag = "19")]
+    pub coalesce_batch_fetch: ::core::option::Option<u64>,
     #[prost(string, tag = "20")]
     pub filter_predicate: ::prost::alloc::string::String,
     #[prost(string, tag = "21")]
@@ -87,22 +87,22 @@ pub struct ScheduleStage {
     pub shj_on: ::prost::alloc::string::String,
     #[prost(string, tag = "37")]
     pub shj_filter: ::prost::alloc::string::String,
-    #[prost(uint32, tag = "38")]
-    pub global_limit_skip: u32,
-    #[prost(uint32, optional, tag = "39")]
-    pub global_limit_fetch: ::core::option::Option<u32>,
-    #[prost(uint32, tag = "40")]
-    pub local_limit_fetch: u32,
-    #[prost(uint32, tag = "41")]
-    pub memory_partitions: u32,
+    #[prost(uint64, tag = "38")]
+    pub global_limit_skip: u64,
+    #[prost(uint64, optional, tag = "39")]
+    pub global_limit_fetch: ::core::option::Option<u64>,
+    #[prost(uint64, tag = "40")]
+    pub local_limit_fetch: u64,
+    #[prost(uint64, tag = "41")]
+    pub memory_partitions: u64,
     #[prost(string, tag = "42")]
     pub memory_partition_sizes: ::prost::alloc::string::String,
     #[prost(string, tag = "43")]
     pub memory_output_ordering: ::prost::alloc::string::String,
     #[prost(string, tag = "44")]
     pub memory_constraints: ::prost::alloc::string::String,
-    #[prost(uint32, tag = "45")]
-    pub lazy_memory_partitions: u32,
+    #[prost(uint64, tag = "45")]
+    pub lazy_memory_partitions: u64,
     #[prost(string, tag = "46")]
     pub lazy_memory_batch_generators: ::prost::alloc::string::String,
     #[prost(string, tag = "47")]
@@ -115,34 +115,34 @@ pub struct ScheduleStage {
     pub repartition_name: ::prost::alloc::string::String,
     #[prost(string, tag = "51")]
     pub repartition_partitioning: ::prost::alloc::string::String,
-    #[prost(uint32, tag = "52")]
-    pub repartition_input_partitions: u32,
+    #[prost(uint64, tag = "52")]
+    pub repartition_input_partitions: u64,
     #[prost(bool, tag = "53")]
     pub repartition_preserve_order: bool,
     #[prost(string, optional, tag = "54")]
     pub repartition_sort_exprs: ::core::option::Option<::prost::alloc::string::String>,
-    #[prost(uint32, optional, tag = "55")]
-    pub partial_sort_tok_fetch: ::core::option::Option<u32>,
+    #[prost(uint64, optional, tag = "55")]
+    pub partial_sort_tok_fetch: ::core::option::Option<u64>,
     #[prost(string, tag = "56")]
     pub partial_sort_expr: ::prost::alloc::string::String,
-    #[prost(uint32, tag = "57")]
-    pub partial_sort_common_prefix_length: u32,
-    #[prost(uint32, optional, tag = "58")]
-    pub sort_preserving_merge_fetch: ::core::option::Option<u32>,
+    #[prost(uint64, tag = "57")]
+    pub partial_sort_common_prefix_length: u64,
+    #[prost(uint64, optional, tag = "58")]
+    pub sort_preserving_merge_fetch: ::core::option::Option<u64>,
     #[prost(string, tag = "59")]
     pub work_table_name: ::prost::alloc::string::String,
-    #[prost(uint32, tag = "60")]
-    pub streaming_table_partition_sizes: u32,
+    #[prost(uint64, tag = "60")]
+    pub streaming_table_partition_sizes: u64,
     #[prost(string, tag = "61")]
     pub streaming_table_projection_schema: ::prost::alloc::string::String,
     #[prost(bool, tag = "62")]
     pub streaming_table_infinite_source: bool,
-    #[prost(uint32, optional, tag = "63")]
-    pub streaming_table_fetch: ::core::option::Option<u32>,
+    #[prost(uint64, optional, tag = "63")]
+    pub streaming_table_fetch: ::core::option::Option<u64>,
     #[prost(string, tag = "64")]
     pub streaming_table_ordering: ::prost::alloc::string::String,
-    #[prost(uint32, tag = "65")]
-    pub statistics_col_count: u32,
+    #[prost(uint64, tag = "65")]
+    pub statistics_col_count: u64,
     #[prost(string, tag = "66")]
     pub statistics_row_count: ::prost::alloc::string::String,
     #[prost(string, tag = "67")]
@@ -151,8 +151,8 @@ pub struct ScheduleStage {
     pub bounded_window_input_order_mode: ::prost::alloc::string::String,
     #[prost(string, tag = "69")]
     pub window_agg_wdw: ::prost::alloc::string::String,
-    #[prost(uint32, tag = "70")]
-    pub memory_table_partitions: u32,
+    #[prost(uint64, tag = "70")]
+    pub memory_table_partitions: u64,
     #[prost(string, tag = "71")]
     pub parquet_base_config: ::prost::alloc::string::String,
     #[prost(string, tag = "72")]
@@ -163,24 +163,51 @@ pub struct ScheduleStage {
     pub csv_base_config: ::prost::alloc::string::String,
     #[prost(string, tag = "75")]
     pub parquet_sink_file_group: ::prost::alloc::string::String,
-    #[prost(uint32, tag = "76")]
-    pub shuffle_reader_partitions: u32,
+    #[prost(uint64, tag = "76")]
+    pub shuffle_reader_partitions: u64,
     #[prost(string, tag = "77")]
     pub shuffle_writer_output_partitioning: ::prost::alloc::string::String,
     #[prost(string, tag = "78")]
     pub unresolved_shuffle_output_partitioning: ::prost::alloc::string::String,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ScheduleStage {
+    #[prost(uint64, tag = "1")]
+    pub stage_id: u64,
+    #[prost(uint64, repeated, tag = "2")]
+    pub output_links: ::prost::alloc::vec::Vec<u64>,
+    #[prost(message, repeated, tag = "3")]
+    pub operators: ::prost::alloc::vec::Vec<StageOperator>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ScheduleJob {
     #[prost(string, tag = "1")]
     pub job_id: ::prost::alloc::string::String,
-    #[prost(message, repeated, tag = "2")]
+    #[prost(string, tag = "2")]
+    pub job_name: ::prost::alloc::string::String,
+    #[prost(message, repeated, tag = "3")]
     pub stages: ::prost::alloc::vec::Vec<ScheduleStage>,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct VmSet {
+    #[prost(string, tag = "1")]
+    pub vm_spec_id: ::prost::alloc::string::String,
+    #[prost(uint64, tag = "2")]
+    pub vm_count: u64,
+}
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct StageSchedulePolicy {
+    #[prost(uint64, tag = "1")]
+    pub stage_id: u64,
+    #[prost(message, optional, tag = "2")]
+    pub vm_set: ::core::option::Option<VmSet>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct ScheduleResult {
     #[prost(string, tag = "1")]
     pub status: ::prost::alloc::string::String,
+    #[prost(message, repeated, tag = "2")]
+    pub schedule_policy: ::prost::alloc::vec::Vec<StageSchedulePolicy>,
 }
 /// Generated client implementations.
 pub mod brain_server_client {

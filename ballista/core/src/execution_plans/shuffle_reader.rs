@@ -40,7 +40,9 @@ use datafusion::common::runtime::SpawnedTask;
 use datafusion::error::Result;
 use datafusion::physical_plan::metrics::{ExecutionPlanMetricsSet, MetricsSet};
 use datafusion::physical_plan::{
-    ColumnStatistics, CsvVisitorResult, DisplayAs, DisplayFormatType, ExecutionPlan, ExplainCsvRow, Partitioning, PlanProperties, RecordBatchStream, SendableRecordBatchStream, Statistics
+    ColumnStatistics, CsvVisitorResult, DisplayAs, DisplayFormatType, ExecutionPlan,
+    ExplainCsvRow, Partitioning, PlanProperties, RecordBatchStream,
+    SendableRecordBatchStream, Statistics,
 };
 use futures::{Stream, StreamExt, TryStreamExt};
 

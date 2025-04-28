@@ -32,7 +32,8 @@ use datafusion::logical_expr::LogicalPlan;
 use datafusion::physical_expr::EquivalenceProperties;
 use datafusion::physical_plan::stream::RecordBatchStreamAdapter;
 use datafusion::physical_plan::{
-    CsvVisitorResult, DisplayAs, DisplayFormatType, ExecutionPlan, ExplainCsvRow, Partitioning, PlanProperties, SendableRecordBatchStream, Statistics
+    CsvVisitorResult, DisplayAs, DisplayFormatType, ExecutionPlan, ExplainCsvRow,
+    Partitioning, PlanProperties, SendableRecordBatchStream, Statistics,
 };
 use datafusion_proto::logical_plan::{
     AsLogicalPlan, DefaultLogicalExtensionCodec, LogicalExtensionCodec,

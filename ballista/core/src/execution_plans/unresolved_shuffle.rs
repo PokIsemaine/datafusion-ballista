@@ -22,7 +22,8 @@ use datafusion::arrow::datatypes::SchemaRef;
 use datafusion::error::{DataFusionError, Result};
 use datafusion::execution::context::TaskContext;
 use datafusion::physical_plan::{
-    CsvVisitorResult, DisplayAs, DisplayFormatType, ExecutionPlan, ExplainCsvRow, Partitioning, PlanProperties, SendableRecordBatchStream, Statistics
+    CsvVisitorResult, DisplayAs, DisplayFormatType, ExecutionPlan, ExplainCsvRow,
+    Partitioning, PlanProperties, SendableRecordBatchStream, Statistics,
 };
 
 /// UnresolvedShuffleExec represents a dependency on the results of a ShuffleWriterExec node which hasn't computed yet.

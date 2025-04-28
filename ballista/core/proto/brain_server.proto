@@ -12,14 +12,123 @@ message HelloReply {
   string message = 1;
 }
 
-message ScheduleTask {}
+message StageOperator {
+  string job_id = 1;
+  string job_name = 2;
+  uint64 stage_id = 3;
+  uint64 current_op_id = 4;
+  uint64 parent_op_id = 5;
 
+  string operator_type = 6;
+
+  string stat_num_rows = 7;
+  string stat_total_byte_size = 8;
+  string column_stats = 9;
+
+  optional uint64 topk_fetch = 10;
+  string sort_expr = 11;
+  bool preserve_partitioning = 12;
+
+  string agg_mode = 13;
+  string agg_gby = 14;
+  string agg_aggr = 15;
+  optional uint64 agg_limit = 16;
+  string agg_input_order_mode = 17;
+
+  uint64 coalesce_batch_target_batch_size = 18;
+  optional uint64 coalesce_batch_fetch = 19;
+
+  string filter_predicate = 20;
+  string filter_projection = 21;
+
+  string hj_mode = 22;
+  string hj_join_type = 23;
+  string hj_on = 24;
+  string hj_filter = 25;
+  string hj_projections = 26;
+
+  string nlj_join_type = 27;
+  string nlj_filter = 28;
+  string nlj_projections = 29;
+
+  string smj_join_type = 30;
+  string smj_on = 31;
+  string smj_filter = 32;
+
+  string sort_required_expr = 33;
+
+  string shj_mode = 34;
+  string shj_join_type = 35;
+  string shj_on = 36;
+  string shj_filter = 37;
+
+  uint64 global_limit_skip = 38;
+  optional uint64 global_limit_fetch = 39;
+
+  uint64 local_limit_fetch = 40;
+
+  uint64 memory_partitions = 41;
+  string memory_partition_sizes = 42;
+  string memory_output_ordering = 43;
+  string memory_constraints = 44;
+
+  uint64 lazy_memory_partitions = 45;
+  string lazy_memory_batch_generators = 46;
+
+  string projection_expr = 47;
+
+  string recursive_query_name = 48;
+  bool recursive_query_is_distinct = 49;
+
+  string repartition_name = 50;
+  string repartition_partitioning = 51;
+  uint64 repartition_input_partitions = 52;
+  bool repartition_preserve_order = 53;
+  optional string repartition_sort_exprs = 54;
+
+  optional uint64 partial_sort_tok_fetch = 55;
+  string partial_sort_expr = 56;
+  uint64 partial_sort_common_prefix_length = 57;
+
+  optional uint64 sort_preserving_merge_fetch = 58;
+
+  string work_table_name = 59;
+
+  uint64 streaming_table_partition_sizes = 60;
+  string streaming_table_projection_schema = 61;
+  bool streaming_table_infinite_source = 62;
+  optional uint64 streaming_table_fetch = 63;
+  string streaming_table_ordering = 64;
+
+  uint64 statistics_col_count = 65;
+  string statistics_row_count = 66;
+
+  string bounded_window_wdw = 67;
+  string bounded_window_input_order_mode = 68;
+
+  string window_agg_wdw = 69;
+
+  uint64 memory_table_partitions = 70;
+
+  string parquet_base_config = 71;
+  string parquet_predicate = 72;
+  string parquet_prunning_predicate = 73;
+
+  string csv_base_config = 74;
+
+  string parquet_sink_file_group = 75;
+
+  uint64 shuffle_reader_partitions = 76;
+
+  string shuffle_writer_output_partitioning = 77;
+
+  string unresolved_shuffle_output_partitioning = 78;
+}
 
 message ScheduleStage {
-  string stage_id = 1;
-  repeated ScheduleTask tasks = 2;
-  // json string
-  string physical_plan = 3;
+  uint64 stage_id = 1;
+  repeated uint64 output_links = 2;
+  repeated StageOperator operators = 3;
 }
 
 message ScheduleJob {
@@ -28,8 +137,19 @@ message ScheduleJob {
   repeated ScheduleStage stages = 3;
 }
 
+message VMSet {
+  string vm_spec_id = 1;
+  uint64 vm_count = 2;
+}
+
+message StageSchedulePolicy {
+  uint64 stage_id = 1;
+  VMSet vm_set = 2;
+}
+
 message ScheduleResult {
   string status = 1;
+  repeated StageSchedulePolicy schedule_policy = 2; 
 }
 
 // 定义服务

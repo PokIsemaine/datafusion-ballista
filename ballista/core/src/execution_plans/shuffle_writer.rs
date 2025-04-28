@@ -51,7 +51,8 @@ use datafusion::physical_plan::metrics::{
 };
 
 use datafusion::physical_plan::{
-    displayable, CsvVisitorResult, DisplayAs, DisplayFormatType, ExecutionPlan, ExplainCsvRow, Partitioning, PlanProperties, SendableRecordBatchStream, Statistics
+    displayable, CsvVisitorResult, DisplayAs, DisplayFormatType, ExecutionPlan,
+    ExplainCsvRow, Partitioning, PlanProperties, SendableRecordBatchStream, Statistics,
 };
 use futures::{StreamExt, TryFutureExt, TryStreamExt};
 
