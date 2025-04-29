@@ -24,38 +24,27 @@ class NetworkConfig:
 
 class VMType:
     def __init__(self, name, cpu, memory_gb, price_per_hour, network: NetworkConfig, cloud_storage : CloudStorage = None, local_storage: LocalStorage = None):
-        """
-        参数说明：
-        - name: VM 名称
-        - cpu: vCPU 数量
-        - memory_gb: 内存（单位：GB）
-        - price_per_hour: 每小时价格
-        """
         self.name = name
         self.cpu = cpu
         self.memory_gb = memory_gb
         self.network = network  
         self.cloud_storage = cloud_storage
         self.local_storage = local_storage        
-
-        # 自动换算每秒价格
-        self.price_per_hour = price_per_hour / 3600
+        self.price_per_hour = price_per_hour
+        # TODO spot instance
 
     def __repr__(self):
-        vm_info = f"VMType(name={self.name}, cpu={self.cpu}, memory_gb={self.memory_gb}, price_per_hour={self.price_per_hour:.4f})"
-        if self.network:
-            vm_info += f", network={self.network.bandwidth} Gbit/s, {self.network.pps} pps"
-            if self.network.peak_bandwidth:
-                vm_info += f", peak_bandwidth={self.network.peak_bandwidth} Gbit/s"
-        if self.cloud_storage:
-            vm_info += f", cloud_storage={self.cloud_storage.iops_base} IOPS, {self.cloud_storage.cloud_storage_bandwidth} Gbit/s"
-            if self.cloud_storage.iops_peak:
-                vm_info += f", peak_iops={self.cloud_storage.iops_peak} IOPS"
-            if self.cloud_storage.cloud_storage_bandwidth_peak:
-                vm_info += f", peak_bandwidth={self.cloud_storage.cloud_storage_bandwidth_peak} Gbit/s"
-        if self.local_storage:
-            vm_info += f", local_storage={self.local_storage.local_storage_type}, {self.local_storage.local_storage_gb} GB"
-        return vm_info
+        return (f"VMType(name={self.name}, cpu={self.cpu}, memory_gb={self.memory_gb}, "
+                f"price_per_hour={self.price_per_hour:.4f}, "
+                f"network={self.network}, cloud_storage={self.cloud_storage}, "
+                f"local_storage={self.local_storage})")
+    
+    def get_price_per_second(self) -> float:
+        """
+        TODO: Spot Instance 价格
+        获取每秒价格
+        """
+        return self.price_per_hour / 3600
 
 # 阿里云部分 VM 类型，有的配置太高实验不需要就省略了
 vm_types = [
@@ -107,5 +96,5 @@ vm_types = [
 for vm in vm_types:
     print(vm)
     
-def get_vm_types():
+def get_vm_types() -> list[VMType]:
     return vm_types

@@ -132,6 +132,14 @@ class StageInfo:
 class JobInfo:
     job_id: str = ""
     stages: List[StageInfo] = field(default_factory=list)
+    
+    def get_num_stages(self) -> int:
+        return len(self.stages)
+    def get_stage(self, stage_id: int) -> Optional[StageInfo]:
+        for stage in self.stages:
+            if stage.stage_id == stage_id:
+                return stage
+        return None
 
 def parse_schedule_job(request) -> JobInfo:
     stages = []

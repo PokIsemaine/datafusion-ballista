@@ -1,6 +1,13 @@
+from brain_server.src.resource.vm_type import get_vm_types
+from brain_server.src.scheduler.moo_scheduler.moo_problem import VMResourceAllocationProblem
 from predict_model.predict import PredictModel
 from proto.data_type import JobInfo
 from proto.brain_server_pb2 import ScheduleResult, StageSchedulePolicy
+from pymoo.algorithms.moo.nsga3 import NSGA3
+from pymoo.optimize import minimize
+from pymoo.util.ref_dirs import get_reference_directions
+from pymoo.operators.sampling.rnd import IntegerRandomSampling
+
 
 class MOOScheduler:
     def __init__(self, config):
@@ -9,78 +16,88 @@ class MOOScheduler:
         self.current_task = None
         self.predict_model = PredictModel()
         self.vm_types = get_vm_types()
+        self.user_preferences = 0.5
         
     def add_task(self, task):
         self.tasks.append(task)
 
     def schedule(self, job_info: JobInfo) -> ScheduleResult:
-        # Mock
-        if job_info is not None:
-            stage_schedule_policy = StageSchedulePolicy(
-                stage_id=1,
-                vm_set={
-                    "vm_spec_id": "VMTypeA",
-                    "vm_count": 2
-                }
-            )
-            return ScheduleResult(status="OK", schedule_policy=[stage_schedule_policy])
-        """
-        TODO: 
-        1. 搜索算法找候选调度策略
-        2. 计算每个候选调度策略的理想情况下性能和成本
-        3. 选择最优的调度策略
-        """    
-        best_policy = None
+        # if job_info is not None:
+        #     stage_schedule_policy = StageSchedulePolicy(
+        #         stage_id=1,
+        #         vm_set={
+        #             "vm_spec_id": "VMTypeA",
+        #             "vm_count": 2
+        #         }
+        #     )
+        #     return ScheduleResult(status="OK", schedule_policy=[stage_schedule_policy])
         
-        num_stages = 50  # 假设有 3 个阶段
-        # 创建问题实例
-        problem = VMResourceAllocationProblem(num_stages=num_stages, vm_types=self.vm_types)
-
-        # 创建参考方向，维度为2
+        # NSGA3 多目标优化
+        problem = VMResourceAllocationProblem(job_info=job_info, vm_types=self.vm_types)
         ref_dirs = get_reference_directions("das-dennis", 2, n_partitions=12)
-
-        # 创建NSGA-III算法对象
-        algorithm = NSGA3(pop_size=num_stages,
+        num_stages = job_info.get_num_stages()
+        algorithm = NSGA3(pop_size = num_stages * len(self.vm_types) // 2,
                         ref_dirs=ref_dirs,
                         sampling=IntegerRandomSampling(),)
-
-        # 执行优化
         moo_result = minimize(problem,
                     algorithm,
                     seed=1,
                     termination=('n_gen', num_stages * 2),
                     verbose=True)
 
-        print("Best solution found:")
-        print(moo_result.X)
-
-        for i in range(len(res.F)):
-            print(f"Solution {i + 1}: {moo_result.F[i]}")  
-
-        vm_counts = res.X[0, ::2].astype(int)
-        vm_specs = res.X[0, 1::2].astype(int)
-
-        print("VM counts:", vm_counts)
-        print("VM specs:", vm_specs)
-
-
-        print("Optimal VM allocation for each stage:")
-        for i in range(problem.num_stages):
-            print(f"Stage {i + 1}: {vm_counts[i]} VMs of type {self.vm_types[vm_specs[i]].name}")
+        # 根据用户偏好从多目标优化结果中选择最优策略
+        best_policy = None
+        best_score = float('inf')
+        for solution in moo_result.X:
+            vm_counts = solution[::2].astype(int)
+            vm_specs = solution[1::2].astype(int)
+            cost, execution_time = moo_result.F[moo_result.X.tolist().index(solution)]
+            score = compute_score(
+                time=execution_time,
+                cost=cost,
+                time_min=0,
+                time_max=1e6,
+                cost_min=0,
+                cost_max=1e6,
+                alpha=self.user_preferences
+            )
+            if score < best_score:
+                best_score = score
+                best_policy = (vm_counts, vm_specs, cost, execution_time)
+            
+        stage_schedule_policies = [
+            StageSchedulePolicy(
+                stage_id=i + 1,
+                vm_set={
+                    "vm_spec_id": self.vm_types[best_policy[1][i]],
+                    "vm_count": best_policy[0][i]
+                }
+            )
+            for i in range(num_stages)
+        ]
+        schedule_result = ScheduleResult(
+            status="OK",
+            schedule_policy=stage_schedule_policies
+        )
                 
         # 4. 动态优化资源池使其满足理论状态
         self.request_resources()
+        
+        return schedule_result
 
-    
-    def cost_estimate(self, schedule_policy: ScheduleResult) -> float:
-        """
-        计算调度策略的成本估计
-        :param schedule_policy: 调度策略
-        :return: 成本估计值
-        """
+    def compute_score(time, cost, time_min, time_max, cost_min, cost_max, alpha):
+        if time > time_max or time < time_min:
+            raise ValueError("Execution time is out of bounds.")
+        if cost > cost_max or cost < cost_min:
+            raise ValueError("Cost is out of bounds.")
+        epsilon = 1e-8
+        time_score = 1 - (time - time_min) / (time_max - time_min + epsilon)
+        cost_score = 1 - (cost - cost_min) / (cost_max - cost_min + epsilon)
+        return alpha * time_score + (1 - alpha) * cost_score
     
     def request_resources(self):
         """
         请求资源
         :param schedule_policy: 调度策略
         """
+        pass
