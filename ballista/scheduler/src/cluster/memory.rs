@@ -20,6 +20,7 @@ use crate::cluster::{
     is_skip_consistent_hash, BoundTask, ClusterState, ExecutorSlot, JobState,
     JobStateEvent, JobStateEventStream, JobStatus, TaskDistributionPolicy, TopologyNode,
 };
+use crate::state::brain_server_manager;
 use crate::state::execution_graph::ExecutionGraph;
 use async_trait::async_trait;
 use ballista_core::error::{BallistaError, Result};
@@ -46,7 +47,7 @@ use datafusion::physical_plan::ExecutionPlan;
 use std::sync::Arc;
 use tokio::sync::{Mutex, MutexGuard};
 
-use super::bind_task_gen_policy;
+use super::{bind_task_brain_server, bind_task_gen_policy};
 
 #[derive(Default)]
 pub struct InMemoryClusterState {
@@ -103,6 +104,7 @@ impl ClusterState for InMemoryClusterState {
         distribution: TaskDistributionPolicy,
         active_jobs: Arc<HashMap<String, JobInfoCache>>,
         executors: Option<HashSet<String>>,
+        brain_server_manager: Arc<brain_server_manager::BrainServerManager>,
     ) -> Result<Vec<BoundTask>> {
         // [{executor_id, task_info}]
         let mut guard = self.task_slots.lock().await;
@@ -171,14 +173,11 @@ impl ClusterState for InMemoryClusterState {
                 }
                 bound_tasks
             }
-            TaskDistributionPolicy::GeneratedPolicy {
-                gen_policy,
-            } => {
+            TaskDistributionPolicy::GeneratedPolicy { gen_policy } => {
                 bind_task_gen_policy(available_slots, active_jobs, gen_policy).await
             }
-            TaskDistributionPolicy::ResourceAware{..} => {
-                return Err(BallistaError::NotImplemented(
-                    "ResourceAware TaskDistribution is not feasible for push-based task scheduling".to_string()))
+            TaskDistributionPolicy::BrainServer => {
+                bind_task_brain_server(active_jobs, brain_server_manager).await
             }
         };
 

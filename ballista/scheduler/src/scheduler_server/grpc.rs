@@ -126,9 +126,9 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerGrpc
                     return Err(Status::unimplemented(
                         "GeneratedPolicy TaskDistribution is not feasible for pull-based task scheduling"))
                 }
-                TaskDistributionPolicy::ResourceAware{..} => {
+                TaskDistributionPolicy::BrainServer{..} => {
                     return Err(Status::unimplemented(
-                        "ResourceAware TaskDistribution is not feasible for pull-based task scheduling"))
+                        "BrainServer TaskDistribution is not feasible for pull-based task scheduling"))
                 }
             };
 

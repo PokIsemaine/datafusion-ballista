@@ -39,6 +39,8 @@ use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use tonic::transport::Channel;
 
+use super::brain_server_manager;
+
 type ExecutorClients = Arc<DashMap<String, ExecutorGrpcClient<Channel>>>;
 
 #[derive(Clone)]
@@ -73,6 +75,7 @@ impl ExecutorManager {
     pub async fn bind_schedulable_tasks(
         &self,
         active_jobs: Arc<HashMap<String, JobInfoCache>>,
+        brain_server_manager: Arc<brain_server_manager::BrainServerManager>,
     ) -> Result<Vec<BoundTask>> {
         if active_jobs.is_empty() {
             warn!("There's no active jobs for binding tasks");
@@ -88,6 +91,7 @@ impl ExecutorManager {
                 self.config.task_distribution.clone(),
                 active_jobs,
                 Some(alive_executors),
+                brain_server_manager,
             )
             .await
     }

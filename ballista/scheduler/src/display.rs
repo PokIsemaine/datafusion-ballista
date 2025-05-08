@@ -65,6 +65,7 @@ pub fn print_stage_metrics(
 
 pub fn print_stage_metrics_csv(
     job_id: &str,
+    job_name: &str,
     stage_id: usize,
     plan: &dyn ExecutionPlan,
     stage_metrics: &[MetricsSet],
@@ -84,13 +85,46 @@ pub fn print_stage_metrics_csv(
         let mut result = Vec::new();
         let _ = DisplayableBallistaExecutionPlan::new(plan, &plan_metrics).csv(
             job_id.to_string(),
-            "default_jobname".to_string(),
+            job_name.to_string(),
             stage_id,
             &mut result,
+            "/home/zsl/datafusion-ballista/train_data/clickbench/stage_metrics/",
         );
     } else {
         error!("Fail to combine stage metrics to plan for stage [{}/{}],  plan metrics array size {} does not equal
                 to the stage metrics array size {}", job_id, stage_id, plan_metrics.len(), stage_metrics.len());
+    }
+}
+
+pub fn print_task_metrics_csv(
+    job_id: &str,
+    job_name: &str,
+    stage_id: usize,
+    task_id: String,
+    plan: &dyn ExecutionPlan,
+    task_metrics: &[MetricsSet],
+) {
+    // The plan_metrics collected here is a snapshot clone from the plan metrics.
+    // They are all empty now and need to combine with the stage metrics in the ExecutionStages
+    let mut plan_metrics = collect_plan_metrics(plan);
+    if plan_metrics.len() == task_metrics.len() {
+        plan_metrics.iter_mut().zip(task_metrics).for_each(
+            |(plan_metric, task_metric)| {
+                task_metric.iter().for_each(|s| plan_metric.push(s.clone()));
+            },
+        );
+        let mut result = Vec::new();
+        let _ = DisplayableBallistaExecutionPlan::new(plan, &plan_metrics).task_csv(
+            job_id.to_string(),
+            job_name.to_string(),
+            stage_id,
+            task_id,
+            &mut result,
+            "/home/zsl/datafusion-ballista/train_data/clickbench/task_metrics/",
+        );
+    } else {
+        error!("Fail to combine stage metrics to plan for stage [{}/{}],  plan metrics array size {} does not equal
+                to the stage metrics array size {}", job_id, stage_id, plan_metrics.len(), task_metrics.len());
     }
 }
 
@@ -148,16 +182,40 @@ impl<'a> DisplayableBallistaExecutionPlan<'a> {
         job_name: String,
         stage_id: usize,
         result: &mut Vec<ExplainCsvRow>,
+        csv_dir: &str,
     ) -> CsvVisitorResult {
-        let plan_csv_file_path =
-            format!("/home/zsl/datafusion-ballista/stage{}.csv", stage_id);
-        let metrics_csv_file_path = format!(
-            "/home/zsl/datafusion-ballista/stage{}_metrics.csv",
-            stage_id
-        );
         let plan_csv_writer = csv::WriterBuilder::new()
             .has_headers(true)
-            .from_writer(File::create(plan_csv_file_path).unwrap());
+            .from_writer(File::create(format!("{}stage{}.csv", csv_dir, stage_id)).unwrap());
+        let metrics_csv_writer = csv::WriterBuilder::new()
+            .has_headers(true)
+            .from_writer(File::create(format!("{}/stage{}_metrics.csv", csv_dir, stage_id)).unwrap());
+        let mut visitor = CsvVisitor {
+            job_id,
+            job_name,
+            stage_id,
+            level: 0,
+            plan_csv_writer: Some(plan_csv_writer),
+            metrics_csv_writer,
+            metrics: self.metrics,
+            metric_index: 0,
+        };
+        csv_accept(self.inner, &mut visitor, result)
+    }
+
+    pub fn task_csv(
+        &self,
+        job_id: String,
+        job_name: String,
+        stage_id: usize,
+        task_id: String,
+        result: &mut Vec<ExplainCsvRow>,
+        csv_dir: &str,
+    ) -> CsvVisitorResult {
+        let metrics_csv_file_path = format!(
+            "{}stage{}_task{}_metrics.csv", csv_dir,
+            stage_id, task_id
+        );
         let metrics_csv_writer = csv::WriterBuilder::new()
             .has_headers(true)
             .from_writer(File::create(metrics_csv_file_path).unwrap());
@@ -166,7 +224,7 @@ impl<'a> DisplayableBallistaExecutionPlan<'a> {
             job_name,
             stage_id,
             level: 0,
-            plan_csv_writer,
+            plan_csv_writer: None,
             metrics_csv_writer,
             metrics: self.metrics,
             metric_index: 0,
@@ -198,10 +256,8 @@ impl ExecutionPlanVisitor for IndentVisitor<'_, '_> {
         write!(self.f, "{:indent$}", "", indent = self.indent * 2)?;
         plan.fmt_as(self.t, self.f)?;
         if let Some(metrics) = self.metrics.get(self.metric_index) {
-            let metrics = metrics
-                .aggregate_by_name()
-                .sorted_for_display()
-                .timestamps_removed();
+            let metrics = metrics.aggregate_by_name().sorted_for_display();
+            // .timestamps_removed();
             write!(self.f, ", metrics=[{metrics}]")?;
         } else {
             write!(self.f, ", metrics=[]")?;
@@ -232,7 +288,7 @@ struct CsvVisitor<'a> {
     job_name: String,
     stage_id: usize,
     level: usize, // TODO: remove this
-    plan_csv_writer: csv::Writer<File>,
+    plan_csv_writer: Option<csv::Writer<File>>,
     metrics_csv_writer: csv::Writer<File>,
     metrics: &'a Vec<MetricsSet>,
     metric_index: usize,
@@ -254,10 +310,10 @@ impl CsvExecutionPlanVisitor for CsvVisitor<'_> {
             .with_current_op_id(curr_id)
             .with_parent_op_id(parrent_id);
         plan.csv_as(&mut explain_csv_row)?;
-
+        let operator_type = explain_csv_row.operator_type.clone();
+        
         let stats = plan.statistics().map_err(|e| e.to_string())?;
         explain_csv_row.stat_num_rows = stats.num_rows.to_string();
-
         explain_csv_row.stat_total_byte_size = stats.total_byte_size.to_string();
         explain_csv_row.column_stats = stats
             .column_statistics
@@ -294,22 +350,21 @@ impl CsvExecutionPlanVisitor for CsvVisitor<'_> {
             })
             .collect::<Vec<_>>()
             .join(",");
-
+        if let Some(plan_csv_writer) = &mut self.plan_csv_writer {
+            plan_csv_writer.serialize(explain_csv_row).unwrap();
+        }
         let mut metrics_csv_row: CsvMetricsRow =
             if let Some(metrics) = self.metrics.get(self.metric_index) {
                 metrics
                     .aggregate_by_name()
                     .sorted_for_display()
-                    .timestamps_removed()
-                    .csv(&explain_csv_row.operator_type)
+                    .csv(&operator_type)
             } else {
                 CsvMetricsRow::default() // Provide a default value for CsvMetrics
             };
-        metrics_csv_row.operator_type = explain_csv_row.operator_type.clone();
+        metrics_csv_row.operator_type = operator_type.clone();
 
         self.metric_index += 1;
-
-        self.plan_csv_writer.serialize(explain_csv_row).unwrap();
         self.metrics_csv_writer.serialize(metrics_csv_row).unwrap();
 
         self.level += 1;
@@ -324,7 +379,9 @@ impl CsvExecutionPlanVisitor for CsvVisitor<'_> {
     ) -> Result<bool, Self::Error> {
         self.level -= 1;
         if self.level == 0 {
-            self.plan_csv_writer.flush().unwrap();
+            if let Some(plan_csv_writer) = &mut self.plan_csv_writer {
+                plan_csv_writer.flush().unwrap();
+            }
             self.metrics_csv_writer.flush().unwrap();
         }
         Ok(true)

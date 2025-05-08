@@ -16,12 +16,12 @@
 // under the License.
 
 use std::sync::Arc;
-use std::vec;
 
 use ballista_core::error::{BallistaError, Result};
 use ballista_core::serde::brain_server_pb::{ScheduleJob, ScheduleStage, StageOperator};
 use ballista_core::utils::create_grpc_client_connection;
 use dashmap::DashMap;
+use datafusion::common::not_impl_err;
 use datafusion::physical_plan::ExplainCsvRow;
 use log::{debug, info};
 use tonic::transport::Channel;
@@ -217,7 +217,10 @@ impl BrainServerManager {
                 let stage_output_links = stage.first().unwrap().output_links.clone();
                 ScheduleStage {
                     stage_id: stage_id as u64,
-                    output_links: stage_output_links.into_iter().map(|x| x as u64).collect(),
+                    output_links: stage_output_links
+                        .into_iter()
+                        .map(|x| x as u64)
+                        .collect(),
                     operators: stage_operators,
                 }
             })
@@ -238,55 +241,17 @@ impl BrainServerManager {
 
         Ok(())
     }
-}
 
-/// Placeholder for task execution metrics
-#[derive(Debug, Clone)]
-pub struct TaskMetrics {
-    pub task_id: String,
-    pub executor_id: String,
-    pub start_time: u64,
-    pub end_time: u64,
-    pub cpu_usage: f64,
-    pub memory_usage: f64,
-    pub input_rows: u64,
-    pub input_bytes: u64,
-    pub output_rows: u64,
-    pub output_bytes: u64,
-}
-
-/// Placeholder for executor information
-#[derive(Debug, Clone)]
-pub struct ExecutorInfo {
-    pub executor_id: String,
-    pub host: String,
-    pub port: u16,
-    pub task_slots: u32,
-    pub cpu_limit: f64,
-    pub memory_limit: f64,
-    pub available_task_slots: u32,
-}
-
-/// Placeholder for resource allocation plan
-#[derive(Debug, Clone)]
-pub struct ResourceAllocationPlan {
-    pub scale_up: Vec<ExecutorSpec>,
-    pub scale_down: Vec<String>, // executor_ids to scale down
-}
-
-impl Default for ResourceAllocationPlan {
-    fn default() -> Self {
-        Self {
-            scale_up: vec![],
-            scale_down: vec![],
-        }
+    pub async fn update_job_stage(
+        &self,
+        job_id: &str,
+        stage_id: u64,
+        update_stage: &Vec<ExplainCsvRow>,
+    ) -> Result<()> {
+        // Here we would send a job stage update request to the brain server
+        // This is a placeholder for the actual implementation
+        info!("Sending job stage update request to brain server");
+        not_impl_err!("BrainServerManager::update_job_stage is not implemented yet")?;
+        Ok(())
     }
-}
-
-/// Placeholder for executor specification used in scale-up requests
-#[derive(Debug, Clone)]
-pub struct ExecutorSpec {
-    pub cpu: f64,
-    pub memory: f64,
-    pub task_slots: u32,
 }

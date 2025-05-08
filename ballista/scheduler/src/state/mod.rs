@@ -171,7 +171,10 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerState<T,
         // 获取可调度的任务
         let schedulable_tasks = self
             .executor_manager
-            .bind_schedulable_tasks(self.task_manager.get_running_job_cache())
+            .bind_schedulable_tasks(
+                self.task_manager.get_running_job_cache(),
+                Arc::new(self.brain_server_manager.clone()),
+            )
             .await?;
         if schedulable_tasks.is_empty() {
             warn!("No schedulable tasks found to be launched");
@@ -373,8 +376,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> SchedulerState<T,
                     .map(|graph| graph.job_name())
                     .unwrap_or("unknown");
 
-                // let csv_file_path = format!("/data/csv_data/assign_{}.csv", job_name);
-                let csv_file_path = format!("/home/zsl/datafusion-ballista/benchmarks/clickbench_data/csv_data/assign_{}.csv", job_name);
+                let csv_file_path = format!("/home/zsl/datafusion-ballista/train_data/clickbench/task_assign/assign_{}.csv", job_name);
 
                 // Ensure parent directories exist
                 if let Some(parent) = Path::new(&csv_file_path).parent() {

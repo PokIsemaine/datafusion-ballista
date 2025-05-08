@@ -225,7 +225,7 @@ pub enum TaskDistribution {
     /// 3. If needed, work stealing can be enabled based on the tolerance of the consistent hashing.
     ConsistentHash,
     GeneratedPolicy,
-    ResourceAware,
+    BrainServer,
 }
 
 #[cfg(feature = "build-binary")]
@@ -264,7 +264,7 @@ pub enum TaskDistributionPolicy {
     GeneratedPolicy {
         gen_policy: String,
     },
-    ResourceAware,
+    BrainServer,
 }
 
 #[cfg(feature = "build-binary")]
@@ -289,7 +289,7 @@ impl TryFrom<Config> for SchedulerConfig {
                     gen_policy: gen_policy,
                 }
             }
-            TaskDistribution::ResourceAware => TaskDistributionPolicy::ResourceAware,
+            TaskDistribution::BrainServer => TaskDistributionPolicy::BrainServer,
         };
 
         let config = SchedulerConfig {

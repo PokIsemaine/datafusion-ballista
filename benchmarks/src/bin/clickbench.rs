@@ -15,23 +15,24 @@
 // specific language governing permissions and limitations
 // under the License.
 
-use std::path::Path;
-use std::path::PathBuf;
-use std::time::Instant;
-use std::time::SystemTime;
-
+use ballista::extension::SessionConfigExt;
 use ballista::prelude::SessionContextExt;
 use ballista_benchmarks::util::CommonOpt;
 use datafusion::arrow::util::pretty::print_batches;
 use datafusion::common::exec_datafusion_err;
 use datafusion::execution::SessionStateBuilder;
 use datafusion::prelude::ParquetReadOptions;
+use datafusion::prelude::SessionConfig;
 use datafusion::DATAFUSION_VERSION;
 use datafusion::{
     error::{DataFusionError, Result},
     prelude::SessionContext,
 };
 use serde::Serialize;
+use std::path::Path;
+use std::path::PathBuf;
+use std::time::Instant;
+use std::time::SystemTime;
 use structopt::StructOpt;
 
 #[derive(Debug, Serialize)]
@@ -172,13 +173,21 @@ impl RunOpt {
     pub async fn run(self) -> Result<()> {
         println!("Running benchmarks with the following options: {self:?}");
         let queries = AllQueries::try_new(self.queries_path.as_path())?;
+        let mut benchmark_name = None;
         let query_range = match self.query {
-            Some(query_id) => query_id..=query_id,
+            Some(query_id) => {
+                benchmark_name = Some(format!("ck_q{query_id}"));
+                query_id..=query_id
+            }
             None => queries.min_query_id()..=queries.max_query_id(),
         };
 
         // configure parquet options
-        let mut config = self.common.config();
+        let mut config = SessionConfig::new_with_ballista().with_ballista_job_name(
+            &benchmark_name.unwrap_or_else(|| "ck_query".to_string()),
+        );
+        // let mut config = self.common.config();
+
         {
             let parquet_options = &mut config.options_mut().execution.parquet;
             // The hits_partitioned dataset specifies string columns
@@ -196,8 +205,7 @@ impl RunOpt {
             self.host.clone().unwrap().as_str(),
             self.port.unwrap()
         );
-        let mut ctx =
-            SessionContext::remote_with_state(&scheduler_address, state).await?;
+        let ctx = SessionContext::remote_with_state(&scheduler_address, state).await?;
 
         ctx.register_parquet(
             "hits",
@@ -233,20 +241,6 @@ impl RunOpt {
             println!("Query {query_id} avg time: {avg:.2} ms");
         }
         Ok(())
-    }
-
-    /// Registers the `hits.parquet` as a table named `hits`
-    async fn register_hits(&self, ctx: &SessionContext) -> Result<()> {
-        let options = Default::default();
-        let path = self.path.as_os_str().to_str().unwrap();
-        ctx.register_parquet("hits", path, options)
-            .await
-            .map_err(|e| {
-                DataFusionError::Context(
-                    format!("Registering 'hits' as {path}"),
-                    Box::new(e),
-                )
-            })
     }
 }
 

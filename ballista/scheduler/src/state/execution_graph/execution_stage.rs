@@ -94,7 +94,7 @@ impl ExecutionStage {
         }
     }
 
-    pub (crate) fn output_links(&self) -> &Vec<usize> {
+    pub(crate) fn output_links(&self) -> &Vec<usize> {
         match self {
             ExecutionStage::UnResolved(stage) => &stage.output_links,
             ExecutionStage::Resolved(stage) => &stage.output_links,

@@ -25,7 +25,7 @@ use datafusion::common::tree_node::TreeNodeRecursion;
 use datafusion::datasource::listing::PartitionedFile;
 use datafusion::datasource::physical_plan::{AvroExec, CsvExec, NdJsonExec, ParquetExec};
 use datafusion::error::DataFusionError;
-use datafusion::physical_plan::ExecutionPlan;
+use datafusion::physical_plan::{ExecutionPlan, ExplainCsvRow};
 use datafusion::prelude::{SessionConfig, SessionContext};
 use futures::Stream;
 use log::{debug, error, info, warn};
@@ -44,6 +44,7 @@ use crate::cluster::memory::{InMemoryClusterState, InMemoryJobState};
 
 use crate::config::{ClusterStorageConfig, SchedulerConfig, TaskDistributionPolicy};
 use crate::scheduler_server::SessionBuilder;
+use crate::state::brain_server_manager;
 use crate::state::execution_graph::{create_task_info, ExecutionGraph, TaskDescription};
 use crate::state::task_manager::JobInfoCache;
 
@@ -165,6 +166,7 @@ pub trait ClusterState: Send + Sync + 'static {
         distribution: TaskDistributionPolicy,
         active_jobs: Arc<HashMap<String, JobInfoCache>>,
         executors: Option<HashSet<String>>,
+        brain_server_manager: Arc<brain_server_manager::BrainServerManager>,
     ) -> Result<Vec<BoundTask>>;
 
     /// Unbind executor and task when a task finishes or fails. It will increase the executor
@@ -582,6 +584,66 @@ pub(crate) async fn bind_task_gen_policy(
                 let executor_id =
                     available_executors[*executor_idx.unwrap_or(&0)].clone();
 
+                *task_id_gen += 1;
+                *task_info = Some(create_task_info(executor_id.clone(), task_id));
+
+                let partition = PartitionId {
+                    job_id: job_id.clone(),
+                    stage_id: running_stage.stage_id,
+                    partition_id,
+                };
+                let task_desc = TaskDescription {
+                    session_id: session_id.clone(),
+                    partition,
+                    stage_attempt_num: running_stage.stage_attempt_num,
+                    task_id,
+                    task_attempt: running_stage.task_failure_numbers[partition_id],
+                    plan: running_stage.plan.clone(),
+                    session_config: running_stage.session_config.clone(),
+                };
+                schedulable_tasks.push((executor_id, task_desc));
+            }
+        }
+    }
+
+    schedulable_tasks
+}
+
+pub(crate) async fn bind_task_brain_server(
+    active_jobs: Arc<HashMap<String, JobInfoCache>>,
+    brain_server_manager: Arc<brain_server_manager::BrainServerManager>,
+) -> Vec<BoundTask> {
+    let mut schedulable_tasks: Vec<BoundTask> = vec![];
+
+    for (job_id, job_info) in active_jobs.iter() {
+        if !matches!(job_info.status, Some(job_status::Status::Running(_))) {
+            debug!(
+                "Job {} is not in running status and will be skipped",
+                job_id
+            );
+            continue;
+        }
+        let mut graph = job_info.execution_graph.write().await;
+        let session_id = graph.session_id().to_string();
+        let black_list = vec![];
+        while let Some((running_stage, task_id_gen)) =
+            graph.fetch_running_stage(&black_list)
+        {
+            let mut update_stage: Vec<ExplainCsvRow> = vec![];
+            // TODO: 动态更新
+            // brain_server_manager.update_job_stage(job_id, running_stage.stage_id, update_stage);
+            // We are sure that it will at least bind one task by going through the following logic.
+            // It will not go into a dead loop.
+            let runnable_tasks = running_stage
+                .task_infos
+                .iter_mut()
+                .enumerate()
+                .filter(|(_partition, info)| info.is_none())
+                .collect::<Vec<_>>();
+            for (partition_id, task_info) in runnable_tasks {
+                // TODO
+                let executor_id = "TODO".to_string();
+                let task_id = *task_id_gen;
                 *task_id_gen += 1;
                 *task_info = Some(create_task_info(executor_id.clone(), task_id));
 

@@ -25,6 +25,7 @@ use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use datafusion::physical_plan::display::DisplayableExecutionPlan;
+use datafusion::physical_plan::metrics::MetricsSet;
 use datafusion::physical_plan::{accept, ExecutionPlan, ExecutionPlanVisitor};
 use datafusion::prelude::SessionConfig;
 use log::{error, info, warn};
@@ -42,7 +43,9 @@ use ballista_core::serde::scheduler::{
     ExecutorMetadata, PartitionId, PartitionLocation, PartitionStats,
 };
 
-use crate::display::{print_stage_metrics, print_stage_metrics_csv};
+use crate::display::{
+    print_stage_metrics, print_stage_metrics_csv, print_task_metrics_csv,
+};
 use crate::planner::DistributedPlanner;
 use crate::scheduler_server::event::QueryStageSchedulerEvent;
 use crate::scheduler_server::timestamp_millis;
@@ -279,6 +282,7 @@ impl ExecutionGraph {
         max_stage_failures: usize,
     ) -> Result<Vec<QueryStageSchedulerEvent>> {
         let job_id = self.job_id().to_owned();
+        let job_name = self.job_name().to_owned();
         // First of all, classify the statuses by stages
         let mut job_task_statuses: HashMap<usize, Vec<TaskStatus>> = HashMap::new();
         for task_status in task_statuses {
@@ -444,6 +448,20 @@ impl ExecutionGraph {
                             successful_task,
                         )) = task_status.status
                         {
+                            let csv_metrics_set = operator_metrics
+                                .clone()
+                                .into_iter()
+                                .map(|ms| TryInto::<MetricsSet>::try_into(ms))
+                                .collect::<Result<Vec<MetricsSet>>>()?;
+                            // stage{}_task{}_metrics.csv 打印 task 级别指标
+                            print_task_metrics_csv(
+                                &job_id,
+                                &job_name,
+                                stage_id,
+                                task_status.task_id.to_string(),
+                                running_stage.plan.as_ref(),
+                                &csv_metrics_set,
+                            );
                             // update task metrics for successfu task
                             running_stage
                                 .update_task_metrics(partition_id, operator_metrics)?;
@@ -477,8 +495,10 @@ impl ExecutionGraph {
                                 stage_metrics,
                             );
 
+                            // 每个 stage 输出一个 stage.csv(plan 和统计信息) + stage_metrics.csv(指标)
                             print_stage_metrics_csv(
                                 &job_id,
+                                &job_name,
                                 stage_id,
                                 running_stage.plan.as_ref(),
                                 stage_metrics,
@@ -735,7 +755,7 @@ impl ExecutionGraph {
             });
             // self.execution_to_csv("/data/csv_data")?;
             self.execution_to_csv(
-                "/home/zsl/datafusion-ballista/benchmarks/clickbench_data/csv_data",
+                "/home/zsl/datafusion-ballista/train_data/clickbench/succ_graph_data",
             )?;
         } else if has_resolved {
             events.push(QueryStageSchedulerEvent::JobUpdated(job_id))
@@ -1370,7 +1390,7 @@ impl ExecutionGraph {
                 "stage_id",
                 "stage_attempt_num",
                 "stage_partitions",
-                "plan", // stage_record
+                // "plan", // stage_record
                 "task_id",
                 "task_scheduled_time",
                 "task_launch_time",
@@ -1407,12 +1427,12 @@ impl ExecutionGraph {
         // 写入 CSV 行
         for (stage_id, stage) in self.stages.iter() {
             if let ExecutionStage::Successful(successful_stage) = stage {
-                let plan_record = format!("{:?}", successful_stage.plan);
+                // let plan_record = format!("{:?}", successful_stage.plan);
                 let stage_record = vec![
                     stage_id.to_string(),
                     successful_stage.stage_attempt_num.to_string(),
                     successful_stage.partitions.to_string(),
-                    plan_record,
+                    // plan_record,
                 ];
 
                 // TODO: output_links
