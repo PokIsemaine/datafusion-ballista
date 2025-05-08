@@ -93,8 +93,5 @@ vm_types = [
     VMType(name="ecs.d1ne.14xlarge", cpu=56, memory_gb=225, price_per_hour=38.317, network=NetworkConfig(35, 450), local_storage=LocalStorage(LocalStorage.LocalStorageType.HDD, 28 * 5500)),
 ]
 
-for vm in vm_types:
-    print(vm)
-    
 def get_vm_types() -> list[VMType]:
     return vm_types
