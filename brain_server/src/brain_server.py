@@ -3,7 +3,11 @@ import grpc
 from concurrent import futures
 import time
 
-# 导入生成的模块
+import sys
+import os
+# 添加当前目录到 Python 路径，确保可以找到所有模块
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+print(sys.path)
 from scheduler.moo_scheduler.moo_scheduler import MOOScheduler
 from proto.data_type import JobInfo, parse_schedule_job
 from proto.brain_server_pb2 import HelloReply, ScheduleResult, ScheduleJob

@@ -1,12 +1,8 @@
 import numpy as np
-
 from pymoo.core.problem import Problem
-
-import sys
-sys.path.append("/home/zsl/datafusion-ballista/brain_server")
-from brain_server.src.predict_model.predict import JobPredictResult, PredictModel
+from predict_model.predict import JobPredictResult, PredictModel
 from proto.data_type import JobInfo
-from src.resource.vm_type import VMType, get_vm_types
+from resource.vm_type import VMType, get_vm_types
 
 class VMResourceAllocationProblem(Problem):
     def __init__(self, job_info: JobInfo, vm_types):

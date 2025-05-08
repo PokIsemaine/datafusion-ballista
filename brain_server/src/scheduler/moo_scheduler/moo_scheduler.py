@@ -1,5 +1,5 @@
-from brain_server.src.resource.vm_type import get_vm_types
-from brain_server.src.scheduler.moo_scheduler.moo_problem import VMResourceAllocationProblem
+from resource.vm_type import get_vm_types
+from scheduler.moo_scheduler.moo_problem import VMResourceAllocationProblem
 from predict_model.predict import PredictModel
 from proto.data_type import JobInfo
 from proto.brain_server_pb2 import ScheduleResult, StageSchedulePolicy
@@ -7,7 +7,6 @@ from pymoo.algorithms.moo.nsga3 import NSGA3
 from pymoo.optimize import minimize
 from pymoo.util.ref_dirs import get_reference_directions
 from pymoo.operators.sampling.rnd import IntegerRandomSampling
-
 
 class MOOScheduler:
     def __init__(self, config):
@@ -22,15 +21,15 @@ class MOOScheduler:
         self.tasks.append(task)
 
     def schedule(self, job_info: JobInfo) -> ScheduleResult:
-        # if job_info is not None:
-        #     stage_schedule_policy = StageSchedulePolicy(
-        #         stage_id=1,
-        #         vm_set={
-        #             "vm_spec_id": "VMTypeA",
-        #             "vm_count": 2
-        #         }
-        #     )
-        #     return ScheduleResult(status="OK", schedule_policy=[stage_schedule_policy])
+        if job_info is not None:
+            stage_schedule_policy = StageSchedulePolicy(
+                stage_id=1,
+                vm_set={
+                    "vm_spec_id": "VMTypeA",
+                    "vm_count": 2
+                }
+            )
+            return ScheduleResult(status="OK", schedule_policy=[stage_schedule_policy])
         
         # NSGA3 多目标优化
         problem = VMResourceAllocationProblem(job_info=job_info, vm_types=self.vm_types)
@@ -52,7 +51,7 @@ class MOOScheduler:
             vm_counts = solution[::2].astype(int)
             vm_specs = solution[1::2].astype(int)
             cost, execution_time = moo_result.F[moo_result.X.tolist().index(solution)]
-            score = compute_score(
+            score = self.compute_score(
                 time=execution_time,
                 cost=cost,
                 time_min=0,
@@ -84,7 +83,8 @@ class MOOScheduler:
         self.request_resources()
         
         return schedule_result
-
+    
+    @staticmethod
     def compute_score(time, cost, time_min, time_max, cost_min, cost_max, alpha):
         if time > time_max or time < time_min:
             raise ValueError("Execution time is out of bounds.")
