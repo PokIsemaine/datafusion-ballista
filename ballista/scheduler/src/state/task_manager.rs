@@ -257,7 +257,7 @@ impl<T: 'static + AsLogicalPlan, U: 'static + AsExecutionPlan> TaskManager<T, U>
                 stage_id,
                 stage_graph[&stage_id].clone(),
                 &mut stage_plan,
-                "/home/zsl/datafusion-ballista/train_data/clickbench/submit_graph/"
+                "/home/zsl/datafusion-ballista/train_data/clickbench/submit_graph/",
             );
             schedule_stages.push(stage_plan);
         }

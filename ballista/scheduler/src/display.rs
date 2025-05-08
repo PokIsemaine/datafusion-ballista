@@ -184,12 +184,12 @@ impl<'a> DisplayableBallistaExecutionPlan<'a> {
         result: &mut Vec<ExplainCsvRow>,
         csv_dir: &str,
     ) -> CsvVisitorResult {
-        let plan_csv_writer = csv::WriterBuilder::new()
-            .has_headers(true)
-            .from_writer(File::create(format!("{}stage{}.csv", csv_dir, stage_id)).unwrap());
-        let metrics_csv_writer = csv::WriterBuilder::new()
-            .has_headers(true)
-            .from_writer(File::create(format!("{}/stage{}_metrics.csv", csv_dir, stage_id)).unwrap());
+        let plan_csv_writer = csv::WriterBuilder::new().has_headers(true).from_writer(
+            File::create(format!("{}stage{}_plan.csv", csv_dir, stage_id)).unwrap(),
+        );
+        let metrics_csv_writer = csv::WriterBuilder::new().has_headers(true).from_writer(
+            File::create(format!("{}/stage{}_metrics.csv", csv_dir, stage_id)).unwrap(),
+        );
         let mut visitor = CsvVisitor {
             job_id,
             job_name,
@@ -212,19 +212,26 @@ impl<'a> DisplayableBallistaExecutionPlan<'a> {
         result: &mut Vec<ExplainCsvRow>,
         csv_dir: &str,
     ) -> CsvVisitorResult {
-        let metrics_csv_file_path = format!(
-            "{}stage{}_task{}_metrics.csv", csv_dir,
-            stage_id, task_id
+        let plan_csv_writer = csv::WriterBuilder::new().has_headers(true).from_writer(
+            File::create(format!(
+                "{}stage{}_task{}_plan.csv",
+                csv_dir, stage_id, task_id
+            ))
+            .unwrap(),
         );
-        let metrics_csv_writer = csv::WriterBuilder::new()
-            .has_headers(true)
-            .from_writer(File::create(metrics_csv_file_path).unwrap());
+        let metrics_csv_writer = csv::WriterBuilder::new().has_headers(true).from_writer(
+            File::create(format!(
+                "{}stage{}_task{}_metrics.csv",
+                csv_dir, stage_id, task_id
+            ))
+            .unwrap(),
+        );
         let mut visitor = CsvVisitor {
             job_id,
             job_name,
             stage_id,
             level: 0,
-            plan_csv_writer: None,
+            plan_csv_writer: Some(plan_csv_writer),
             metrics_csv_writer,
             metrics: self.metrics,
             metric_index: 0,
@@ -311,7 +318,7 @@ impl CsvExecutionPlanVisitor for CsvVisitor<'_> {
             .with_parent_op_id(parrent_id);
         plan.csv_as(&mut explain_csv_row)?;
         let operator_type = explain_csv_row.operator_type.clone();
-        
+
         let stats = plan.statistics().map_err(|e| e.to_string())?;
         explain_csv_row.stat_num_rows = stats.num_rows.to_string();
         explain_csv_row.stat_total_byte_size = stats.total_byte_size.to_string();
